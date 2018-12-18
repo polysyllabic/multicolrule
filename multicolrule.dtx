@@ -1,0 +1,1125 @@
+% \iffalse meta-comment
+% !TEX program  = pdfLaTeX
+%<*internal>
+\iffalse
+%</internal>
+%<*readme>
+multicolrule - Decorative rules between columns
+=================================================
+
+The multicolrule package lets you customize the appearance of
+the vertical rule that appears between columns of multicolumn
+text. It is primarily intended to work with the multicol
+package, hence its name, but it also supports the twocolumn
+option and \twocolumn macro provided by the standard classes
+(and related classes such as the KOMA-Script equivalents).
+
+Installation
+------------
+
+This package is provided as a .dtx file. To install it and
+compile the documentation at the same time, simply process the
+.dtx file with LaTeX (for example, `pdflatex multicolrule.dtx`).
+To extract the package only, process the file with TeX 
+(`tex multicolrule.dtx`). If you have trouble compiling the
+index for the documentation, note that the documentation uses
+the l3doc class to index the code, and so the makeindex command
+should be the following:
+
+`makeindex -s gind.ist -o multicolrule.ind multicolrule.idx`
+
+This package requires LaTeX3 support to run, and compiling the
+documentation requires a variety of other packages, all of which
+are available on CTAN and any modern installation (TeX Live,
+MiKTeX, etc.).
+%</readme>
+%<*internal>
+\fi
+\def\nameofplainTeX{plain}
+\ifx\fmtname\nameofplainTeX\else
+\expandafter\begingroup
+\fi
+%</internal>
+%<*install>
+\input l3docstrip.tex
+\keepsilent
+\askforoverwritefalse
+\preamble
+----------------------------------------------------------------
+multicolrule --- Decorative rules between columns
+Author: Karl Hagen
+Email: latex@polysyllabic.com
+Released under the LaTeX Project Public License v1.3c or later
+See http://www.latex-project.org/lppl.txt
+----------------------------------------------------------------
+
+\endpreamble
+\postamble
+Copyright (C) 2018 by Karl Hagen <latex@polysyllabic.com>
+ 
+This file may be distributed and/or modified under the
+conditions of the LaTeX Project Public License (LPPL), either
+version 1.3 of this license or (at your option) any later
+version. The latest version of this license is in the file:
+    https://www.latex-project.org/lppl.txt
+
+This work is "maintained" (as per LPPL maintenance status) by
+  Karl Hagen.
+
+This work consists of the files multicolrule.dtx and
+                                mcrule-examples.tex,
+and the derived files           multicolrule.ins,
+                                multicolrule.sty,
+                                multicolrule.pdf, and
+                                mcrule-examples.pdf.
+\endpostamble
+\usedir{tex/latex/multicolrule}
+\generate{
+  \file{\jobname.sty}{\from{\jobname.dtx}{package}}
+}
+%</install>
+%<install>\endbatchfile
+%<*internal>
+\usedir{source/latex/multicolrule}
+\generate{
+  \file{\jobname.ins}{\from{\jobname.dtx}{install}}
+}
+\nopreamble\nopostamble
+\usedir{doc/latex/multicolrule}
+\generate{
+  \file{README.md}{\from{\jobname.dtx}{readme}}
+}
+\ifx\fmtname\nameofplainTeX
+\expandafter\endbatchfile
+\else
+\expandafter\endgroup
+\fi
+%</internal>
+\RequirePackage{expl3}
+\RequirePackage{xparse}
+%<*driver>
+\PassOptionsToPackage{svgnames}{xcolor}
+\documentclass{l3doc}
+\usepackage[T1]{fontenc}
+\usepackage[ttscale=0.85]{libertine}
+\usepackage{microtype}
+\usepackage[tikz]{multicolrule}
+\usepackage{longtable}
+\usepackage{scrlayer-scrpage}
+\usepackage{scrlayer-notecolumn}
+\usepackage{bbding}
+\usepackage{pgfornament}
+\pagestyle{scrheadings}
+\automark[subsection]{section}
+\DeclareNewNoteColumn[
+  reversemarginpar,
+  font=\color{Navy}\footnotesize\sffamily
+]{illustration}
+\ProvideDocumentCommand\opt{m}{\texttt{#1}}
+\NewDocumentCommand{\stydsc}{m}{^^A
+  \makenote*[illustration]{^^A
+    \hspace*{32pt}\parbox{\marginparwidth-32pt}{^^A
+      \raggedright\texttt{#1}}^^A
+  }^^A
+}
+\NewDocumentCommand{\mcrule}{}{\textcolor{Maroon}{multicolrule}}
+\NewDocumentCommand{\kvdesc}{m}{\textcolor{Navy}{\texttt{#1}}}
+\setlength{\columnsep}{24pt}
+\SetMCRule{width=thin,color=Maroon,line-style=dots}
+\EnableCrossrefs         
+\CodelineIndex
+\RecordChanges
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+%\GetFileInfo{\jobname.sty}
+%
+%^^A \bool_lazy_and:nnTF and \tl_if_empty:NTF are appearing in the index even
+%^^A though they're explicitly excluded below. Why is that?
+%
+%\DoNotIndex{\begin,
+%   \bool_gset_true:N,
+%   \bool_if:NTF,
+%   \bool_lazy_and:nnTF,
+%   \bool_new:N,\box_ht:N,\cs_generate_variant:Nn,\cs_gset:Npn,\cs_new:Npn,
+%   \cs_new_nopar:Npn,\cs_set:Npn,\dim_compare_p:nNn,\dim_new:N,\dim_set:Nn,
+%   \end,\ExplSyntaxOff,\ExplSyntaxOn,\fill,\hbox:n,\hspace,\ht,
+%   \int_compare_p:nNn,\int_new:N,\int_set:Nn,\kern,\keys_define:nn,
+%   \keys_set:nn,\msg_error:nnn,\msg_info:nnn,\msg_new:nnn,\msg_warning:nn,
+%   \NewDocumentCommand,\node,\prg_replicate:nn,\ProcessKeysOptions,
+%   \ProvidesExplPackage,\RequirePackage,\rule,
+%   \tl_if_empty:NTF,\tl_new:N,
+%   \tl_set:Nn,\vbox:n,\vbox_to_ht:nn,\vfill,\vrule,\xpatchcmd,
+%   \cs_new_protected:Npn,\@ifpackageloaded,\@width}
+%
+%\title{^^A
+%  \textsf{multicolrule} --- Decorative rules between columns\thanks{^^A
+%   This file describes version \fileversion, last revised \filedate.^^A
+%  }^^A
+%}
+%\author{^^A
+%  Karl Hagen\thanks{\href{mailto://latex@polysyllabic.com}^^A
+%   {latex@polysyllabic.com}}}
+%\date{Released \filedate}
+%
+%\maketitle
+%
+%\changes{v0.1}{2018/12/15}{Initial public release}
+%
+%\begin{abstract}
+% The \mcrule{} package lets you customize the appearance of the vertical rule
+% that appears between columns of multicolumn text. It is primarily intended to
+% work with the \pkg{multicol} package, hence its name, but it also supports
+% the twocolumn option and \cs{twocolumn} macro provided by the standard
+% classes (and related classes such as the KOMA-Script equivalents).
+%\end{abstract}
+%
+%\tableofcontents
+%
+%\begin{multicols}{2}[\section{Introduction}]
+%\SetMCRule{line-style=dashed}
+%  
+% In\stydsc{line-style=dashed} \LaTeX, there are two lengths that control the
+% formatting between columns of multicolumn text: \cs{columnsep} specifies the
+% space between adjacent columns, and \cs{columnseprule} specifies the width of
+% a solid vertical rule that is placed centered between the columns. The
+% \pkg{multicol} package adds the ability to change the color of the rule, but
+% in both vanilla \LaTeX{} and \pkg{multicol}, the rule itself is drawn
+% directly inside the routines that output the column boxes, and is therefore
+% difficult for users to alter.
+%
+% Of course it's a legitimate question why anyone should \emph{want} to change
+% this rule, or indeed use one at all, as good typography tends to avoid using
+% large vertical lines.\footnote{See, for example, the remarks in the
+% documentation for the \pkg{booktabs} package} In my own case, I needed to
+% modify the rule because of the requirements of a particular style I was
+% imitating, and having done the hard work of creating the necessary
+% infrastructure for one line style, it was simple to extend the solution to a
+% more general case. I hope someone else will find the options here useful.
+%
+% Note---in case it isn't obvious yet---that this guide illustrates the basic
+% line styles that \mcrule{} makes available throught the document. The default
+% line-width is 0.4pt (thin), and the default color is \texttt{Maroon}. You can
+% find examples of rules created with all available options in the file
+% \file{mcrule-example.pdf}.
+% \end{multicols}
+%
+% \begin{multicols}{2}[\subsection{Bugs and Known Limitations}]
+% As\stydsc{line-style=dots} this is the first release of this package, there
+% are likely bugs that remain to be uncovered, as well as missing features and
+% inefficient methods that should be improved upon. The development code is
+% maintained on github, and you can file feature requests or bug reports
+% there. Alternatively, you can send an email to
+% \href{mailto://latex@polysyllabic.com}{latex@polysyllabic.com}. I welcome
+% contributions for additional styles, especially to provide more options when
+% running the package without \pkg{tikz}.
+%  
+% The line styles that work by repeating elements in a tiled pattern may have
+% significant gaps at the end of columns, particularly for larger patterns.
+% You can mitigate this problem slightly by tweaking the spaces above and
+% below a pattern, but the basic problem is a side-effect of the way these
+% patterns are implemented (with \cs{cleaders}), which means that only an
+% integer number of copies can be produced. Lines drawn with \pkg{tikz} do not
+% have this problem.
+% 
+% I have also noticed occasional instances, most noticeably when a
+% \env{multicols} environment starts near the bottom of a page and the columns
+% continue to the next one, where the rules are either somewhat shorter than
+% they should be or shifted upward from where they belong. In the limited
+% testing I have done, this appears to be a consequence of how \pkg{multicol}
+% works, as the default rules show the same behavior. I may try to nail down
+% this issue in future version, but as it's an edge case that disappears when
+% you add page breaks or rewrite the text to alter how the columns are filled,
+% it hasn't seemed worth 
+% 
+% This package works by patching the output routines of either \pkg{multicol}
+% or the \LaTeX{} kernel, depending on the mode of operation. It therefore will
+% have no effect if you use a class or package that outputs column text via
+% alternate mechanisms. This includes \pkg{parcolumns}, and probably other
+% classes and packages designed to typeset parallel-column text as well, although
+% I have not done a survey to determine whether this is the case. If you would
+% like support for one of these, please send me an email or file a feature
+% request on github and I'll see what I can do.
+% 
+% \mcrule{} is written using expl3 syntax, and so requires a less-than-ancient
+% installation of \LaTeX. It uses the packages \pkg{l3keys2e}, \pkg{xparse},
+% \pkg{xpatch}, and \pkg{xcolor}, and depending on the mode of operation may
+% also require \pkg{multicol} and \pkg{tikz}. If you have an up-to-date
+% distribution, these requirements should cause no issues.
+% \end{multicols}
+%
+% \begin{multicols}{2}[\subsection{License}]
+% \SetMCRule{width=ultra-thick,line-style=dotted}
+% The\stydsc{\texttt{line-style=dotted, width=ultra-thick}} \mcrule{}
+% package is copyright 2018 by Karl Hagen. It may be distributed and/or modified
+% under the conditions of the \LaTeX{} Project Public License, either version 1.3
+% of this license or (at your option) any later version. The latest version of
+% this license is in \url{http://www.latex-project.org/lppl.txt} and version 1.3
+% or later is part of all distributions of \LaTeX{} version 2005/12/01 or later.
+%  
+% This work has the LPPL maintenance status `maintained.' The Current
+% Maintainer of this work is Karl Hagen.
+% \end{multicols}
+%
+%\begin{multicols}{2}[\section{Package Options}]
+% \SetMCRule{line-style=dash-dot}
+%
+% \subsection{Default Operation}
+% If\stydsc{line-style=dash-dot} you load \mcrule{} with its default settings,
+% it will enable \pkg{multicol} support, and that package will be loaded if it
+% hasn't been already. Note that if you need to pass any parameters to
+% \pkg{multicol}, such as |docolaction|, you should load \pkg{multicol} with
+% the appropriate settings \emph{before} you load \mcrule, as \LaTeX{} does not
+% support reloading packages with different parameters.
+% 
+% \subsection{Option `twocolumn'}
+% \DescribeOption{twocolumn}
+% The \mcrule{} package recognizes the option \opt{twocolumn},
+% either as a package option or as a global class option. If you pass this option
+% to your document class, you do not need to pass it a second time to the
+% package. It is only necessary to use the package option if you plan to have a
+% predominantly one-column document and use \cs{twocolumn} to switch
+% temporarily into two-column mode.
+% 
+% Because \pkg{multicol} does not work well with the ordinary two-column
+% mode, \mcrule{} is only designed to work with one or the other at a time. If
+% you try to use the \opt{twocolumn} option when
+% \pkg{multicol} has already been loaded, you will receive a warning, and
+% nothing is guaranteed. But the custom rules will at best only appear in the
+% conventional two-column mode and not within a \env{multicols} environment.
+% 
+% \subsection{Option `tikz'}
+% \DescribeOption{tikz}
+% You have access to a wider set of line styles if you also use the \pkg{tikz}
+% package. Some line styles are only available if \pkg{tikz} is enabled, and
+% others look better with it. The default behavior of \mcrule{} depends on the
+% status of the \pkg{tikz} package at the time \mcrule{} is loaded. If
+% \mcrule{} detects that \pkg{tikz} is already loaded, then tikz support will
+% be enabled by default. Otherwise, you need the \opt{tikz} to enable it. This
+% option also accepts explicit boolean values, so you can pass |tikz=false| if
+% you want to explicitly disable tikz support. If tikz support is not enabled
+% (or if it is explicitly disabled), the line styles marked \emph{tikz only}
+% in section \ref{sec:linestyles} will be unavailable and errors will result
+% if you try to use them.
+% \end{multicols}
+%
+% \begin{multicols}{2}[\section{The User Interface}]
+% \SetMCRule{width=2pt,line-style=circles}
+% \DescribeMacro{\SetMCRule}
+% The\stydsc{line-style=circles,\\width=2pt} \mcrule{} package has
+% just a single user command:
+%
+% \cs{SetMCRule} \marg{key-value}
+%
+% which takes one parameter containing a key-value list of all options you
+% want to set. You can issue this command in the preamble or the document body.
+% Changes to the rule settings are local to the current group. For example, if
+% you call \cs{SetMCRule} inside a \env{multicols} environment, the rule
+% settings will revert to their previous values once the environment ends. Also
+% note that any changes made with \cs{SetMCRule} when multiple columns are
+% active will appear starting on the same page as your current location when you
+% issue the command, and will extend the height of the full column box. It is not
+% possible to have a rule change styles in the middle of a page unless you close
+% out one \env{multicols} environment and begin another.
+%  
+% Table \ref{table:mcrulekeys} summarizes the keys available in \cs{SetMCRule}.
+% The functions of each is described in detail in the sections that follow.
+% \end{multicols}
+%
+% \begin{longtable}{lp{3.5in}}
+% \caption{\cs{SetMCRule} keys\label{table:mcrulekeys}} \\
+% \toprule
+% Key & Purpose\\
+% \midrule
+% \endfirsthead
+% \caption{\textbackslash SetMCRule keys (cont.)} \\
+% \toprule
+% Key & Purpose\\
+% \midrule
+% \endhead
+% \kvdesc{color} & Set the color of the rule (see sec. \ref{sec:color})\\
+% \kvdesc{color-model} & Set the color model of the rule (see sec.
+% \ref{sec:color})\\
+% \kvdesc{custom-line} & Set a custom \pkg{tikz} line for the rule 
+% (\emph{tikz only}; see \ref{sec:custom})\\
+% \kvdesc{custom-pattern} & Set a custom individual pattern for the rule (see
+% \ref{sec:custom})\\
+% \kvdesc{custom-tile} & Set a custom tiling pattern for the rule
+% (see \ref{sec:custom})\\
+% \kvdesc{double} & Draw two copies of the rule (see sec.
+% \ref{sec:repeats})\\
+% \kvdesc{line-style} & Select the type of rule printed (see sec.
+% \ref{sec:linestyles})\\
+% \kvdesc{single} & Draw a single copy of the rule (\emph{default};
+% see sec. \ref{sec:repeats})\\
+% \kvdesc{repeat} & Set the number of times to draw the rule (see
+% sec. \ref{sec:repeats})\\
+% \kvdesc{repeat-distance} & Set the horizontal space between
+% adjacent copies of repeated rules (see sec. \ref{sec:repeats})\\
+% \kvdesc{triple} & Draw three copies of the rule (see sec.
+% \ref{sec:repeats})\\
+% \kvdesc{width} & Set the width of the rule (see sec.
+% \ref{sec:width})\\
+% \bottomrule
+% \end{longtable}
+%
+% \begin{multicols}{2}[\subsection{Styles with the `line-style' option}^^A
+%   \label{sec:linestyles}]
+%  \SetMCRule{width=4pt,line-style=solid-circles}
+%  
+% You\stydsc{line-style=solid-circles,\\width=4pt} choose a style for the rule
+% with the \kvdesc{line-style} key. The default style is \kvdesc{solid}. In
+% addition to the predefined styles, there are also several ways to get
+% \mcrule{} to draw custom shapes in place of the column rule. The width of
+% most line styles depends on the setting of \cs{columnseprule}, which is the
+% default \LaTeX{} length that controls the width of the column rule
+% (see section \ref{sec:width}). 
+%  
+% Table \ref{table:linestyles} summarizes the available line styles.
+% Most of the basic shapes used to form the patterns come in three versions,
+% which differ only in how closely the pattern is spaced: normal, dense, and
+% loose. These settings parallel those found in \pkg{tikz}, and those
+% line styles whose names are identical to the line patterns in \pkg{tikz}
+% (apart from the substitution of `-' for spaces) produce the same effect.
+% \end{multicols}
+%
+% \begin{longtable}{lp{3in}}
+%   \caption{Styles available for the line-style key\label{table:linestyles}}\\
+%   \toprule
+%   Style & Description\\
+%   \midrule
+%   \endfirsthead
+%   \caption{Available line-style settings (cont.)} \\
+%   \toprule
+%   Style & Description\\
+%   \midrule
+%   \endhead
+%   \kvdesc{circles} & A series of hollow circles (\emph{tikz
+%     only})\\
+%   \kvdesc{dash-dot} & A dash followed by a square dot (\emph{tikz
+%     only})\\
+%   \kvdesc{dash-dot-dot} & A dash followed by two square dots
+%     (\emph{tikz only})\\
+%   \kvdesc{dashed} & A series of dashed lines\\
+%   \kvdesc{dense-circles} & The same as \kvdesc{circles}
+%     but more closely spaced (\emph{tikz only})\\
+%   \kvdesc{dense-dots} & The same as \kvdesc{dots} but
+%     more closely spaced\\
+%   \kvdesc{dense-solid-circles} & The same as \kvdesc{solid-circles} but more closely spaced (\emph{tikz only})\\
+%   \kvdesc{densely-dash-dot} & The same as \kvdesc{dash-dot} but more closely spaced (\emph{tikz only})\\
+%   \kvdesc{densely-dash-dot-dot} & The same as \kvdesc{dash-dot-dot} but more closely spaced (\emph{tikz only})\\
+%   \kvdesc{densely-dashed} & The same as \kvdesc{dashed} but more closely spaced\\
+%   \kvdesc{densely-dotted} & The same as \kvdesc{dotted} but more closely spaced\\
+%   \kvdesc{dots}  & A series of dots drawn with the period (full-stop) of the current font\\
+%   \kvdesc{dotted} & A series of square dots\\
+%   \kvdesc{loose-dots} & The same as \kvdesc{dots} but spaced further apart\\
+%   \kvdesc{loose-circles} & The same as \kvdesc{circles} but spaced further apart (\emph{tikz only})\\
+%   \kvdesc{loose-solid-circles} & The same as \kvdesc{solid-circles} but spaced further apart (\emph{tikz only})\\
+%   \kvdesc{loosely-dash-dot} & The same as \kvdesc{dash-dot} but spaced further apart (\emph{tikz only})\\
+%   \kvdesc{loosely-dash-dot-dot} & The same as \kvdesc{dash-dot-dot} but spaced further apart (\emph{tikz only})\\
+%   \kvdesc{loosely-dashed} & The same as \kvdesc{dashed} but spaced further apart\\
+%   \kvdesc{loosely-dotted} & The same as \kvdesc{dotted} but spaced further apart\\
+% \kvdesc{solid} & A solid line (\emph{default})\\
+% \kvdesc{solid-circles} & A series of filled circles (\emph{tikz only})\\
+% \bottomrule
+% \end{longtable}
+%
+% \begin{multicols}{2}[\subsubsection{Notes on the Styles}]
+% \SetMCRule{width=thin,line-style=solid} 
+% The\stydsc{line-style=solid} \kvdesc{solid}
+% line style is the default. In fact, if you make no calls to \cs{SetMCRule}
+% after loading \mcrule, the column divider will behave exactly as it does with
+% the ordinary \pkg{multicol} package. You can alter its width and color either
+% with the
+% \kvdesc{width} and \kvdesc{color} keys described in
+% sections \ref{sec:width} and \ref{sec:color}, respectively, or you can set the
+% width directly by changing the value of \cs{columnseprule} and renewing the
+% \cs{columnseprulecolor} macro. Like all line styles, the solid line can be
+% repeated as many times as you like (see section \ref{sec:repeats}).
+%  
+% The \kvdesc{dots} style and its variants are rendered with a period
+% (.) in the currently active font. This means that changing
+% \cs{columnseprule} will not change the size of these dots, although, as with
+% all rules, it will not appear at all if \cs{columnseprule} is set to 0pt.
+%
+% The \kvdesc{dotted} styles differ from \kvdesc{dots} in
+% that the former are squares with side lengths equal to \cs{columnseprule}.
+% This mirrors the behavior of the equivalently named dotted patterns in
+% \pkg{tikz}.
+% \end{multicols}
+%
+% \clearpage
+% \subsubsection{Custom Patterns}\label{sec:custom}
+%
+% \begin{multicols}{2}[\noindent\texttt{custom-tile=} \marg{pattern} \marg{space above}
+%   \marg{space below}]
+% \SetMCRule{custom-tile={\SparkleBold}{16pt}{16pt}}
+%
+% There\stydsc{custom-tile= \{\textbackslash SparkleBold\} \{16pt\}\{16pt\}}
+% are three options to create custom rules with \mcrule. The first is the
+% \kvdesc{custom-tile} key. This creates a rule consisting of vertically
+% stacked boxes of arbitrary content---the tile---running the height of the
+% column separator. The \kvdesc{custom-tile} key takes three parameters,
+% which must all be enclosed brackets and may not be omitted. The first
+% should contain the tokens you want to appear as the content of the tile.
+% The second is a dimension specifying the leading vertical space to apply
+% above each copy of the tile. The third is a dimension specifying the
+% trailing vertical space to insert below each copy of the tile.
+%
+% The rule in this section uses the \cs{SparkleBold} symbol from
+% \pkg{bbding}. Notice that when you use the \kvdesc{custom-tile} parameter,
+% you do \emph{not} specify a separate \kvdesc{line-style}.
+% \end{multicols}
+%
+% \begin{multicols}{2}[\noindent\texttt{custom-pattern=} \marg{pattern} \marg{shift
+%    down} \marg{shift up}]
+% \SetMCRule{custom-pattern={\HandRight}{0pt}{0pt}} 
+%
+% The\stydsc{custom-pattern= \{\textbackslash HandRight\} \{0pt\}\{0pt\}}
+% second custom option is with the \kvdesc{custom-pattern} key. The syntax
+% is identical to that for \kvdesc{custom-tile}, but the content you specify
+% will appear once per page or column pair (if the columns occupy less than a
+% full page). This content will be vertically centered if the second and third
+% parameters are both 0pt. You can shift the content down by increasing the
+% second parameter, and up by increasing the third. The rule in this section
+% uses the \cs{HandRight} symbol from \pkg{bbding}.
+% \end{multicols}
+%
+% \begin{multicols}{2}[\noindent\texttt{custom-line=} \marg{draw command}]
+% \SetMCRule{width=1pt,custom-line={\draw[line width=\columnseprule] (TOP) to
+%   [ornament=88] (BOT);}}
+%
+% The\stydsc{custom-line=\{ \textbackslash draw[line width= \textbackslash
+%   columnseprule] (TOP) to [ornament=88] (BOT);\},\\width=1pt} third custom
+% pattern involves setting your own \pkg{tikz} drawing
+% function using the key \kvdesc{custom-line}. The rule in this section is
+% drawn with an ornament from \pkg{pgfornaments}. Obviously, this feature
+% requires \pkg{tikz} support. The value you provide to the
+% \kvdesc{custom-line} key should consist of a \pkg{tikz} command, such as
+% \cs{draw}, without the surrounding \env{tikzpicture} environment.
+% 
+% Before the drawing command is called, \mcrule{} will set up a
+% \env{tikzpicture} with both the x- and y-coordinates scaled to points, and
+% two nodes, named \texttt{(TOP)} and \texttt{(BOT)}, which are set to the
+% coordinates of the top and bottom of the rule. You can then specify your own
+% \cs{draw} function in whatever way you like. The rule separating these
+% columns was drawn with a decorative element from the \pkg{pgfornaments}
+% package.
+%
+% This function will use the color set in
+% \cs{columnseprulecolor} if you don't set it explicitly within the tikz
+% command, but you must provide everything else necessary to draw the line
+% correctly, including the line width. Note that this function should be
+% considered experimental. It works for single-line commands such as the one
+% shown in the example, but I haven't tested it with anything more elaborate. 
+% \end{multicols}
+%
+% \begin{multicols}{2}[\subsection{Colors}\label{sec:color}]
+% \SetMCRule{width=2pt,line-style=solid,color-model=cmy,color={0.7,0.5,0.3}}
+% You\stydsc{line-style=solid,\\width=2pt\\color-model=cmy,\\
+% color=\{0.7,0.5,0.3\}} can set colors for the rule through the
+% \kvdesc{color} and, optionally, the \kvdesc{color-model} keys. \mcrule{} loads the
+% \pkg{xcolor} package to manage colors, and the \kvdesc{color}
+% parameter accepts any name that \pkg{xcolor} recognizes, either natively or
+% as the result of any names you have defined with \cs{definecolor}
+% (see the \pkg{xcolor} documentation). Note that if you want to use color names that
+% are defined through the one of \pkg{xcolor}'s package options, you must load 
+% \pkg{xcolor} before both \mcrule{} and \pkg{tikz} with the relevant options.
+%  
+% To specify a color by a numeric specification, you use the
+% \kvdesc{color-model} parameter to specify any color model that
+% \pkg{xcolor} recognizes (rgb, cmy, etc), and \kvdesc{color} to
+% hold the color-specification list. Because that list is itself comma-separated,
+% you must enclose it in brackets.
+%  
+% The current color setting can always be found in
+% \cs{columnseprulecolor}. If you are running in twocolumn
+% mode without \pkg{multicol}, this command will be provided and colors will
+% work the same way they do with \pkg{multicol}. Note that setting the 
+% \kvdesc{color} key causes \cs{columnseprulecolor}
+% to be redefined within the current group only. If you directly redefine
+% \cs{columnseprulecolor}, the color of the custom rule will
+% reflect this setting. This way, the settings of any packages that might alter
+% the rule color will be respected.
+%\end{multicols}
+%
+% \begin{multicols}{2}[\subsection{Width}\label{sec:width}]
+% \SetMCRule{width=thick,line-style=dash-dot-dot}
+% You\stydsc{line-style=dash-dot-dot,\\width=thick} can set the width of the
+% rule with the \kvdesc{width} key. Legal values are any explicit dimension or
+% dimension expression, as well as with names that parallel those used by
+% \pkg{tikz}, except that spaces in the key names are replaced with hyphens.
+%  
+% The current width of the rule is kept in \cs{columnseprule}, just as in
+% vanilla \LaTeX, and if it is set separately, the custom rule's width will
+% reflect this change. Note that although some line styles do not depend 
+% directly on \cs{columnseprule} to calculate their actual width, the value
+% of \cs{columnseprule} must be greater than 0pt for any rule to appear. This
+% behavior is intentional and is in keeping with the way the default column
+% rules work.
+% \end{multicols}
+%
+% \begin{longtable}{ll}
+%   \caption{Sizes of named line widths\label{table:linewidths}} \\
+%   \toprule
+%   Name & Width\\
+%   \midrule
+%   \endfirsthead
+%   \caption{Sizes of named line widths (cont.)} \\
+%   \toprule
+%   Name & Width\\
+%   \midrule
+%   \endhead
+%   \kvdesc{ultra-thin} & 0.1pt\\
+%   \kvdesc{very-thin}  & 0.2pt\\
+%   \kvdesc{thin}       & 0.4pt\\
+%   \kvdesc{semithick}  & 0.6pt\\
+%   \kvdesc{thick}      & 0.8pt\\
+%   \kvdesc{very-thick} & 1.2pt\\
+%   \kvdesc{ultra-thick} & 1.6pt\\
+%   \bottomrule
+% \end{longtable}
+%
+% \begin{multicols}{2}[\subsection{Repeated Rules}\label{sec:repeats}]
+% \SetMCRule{line-style=dash-dot-dot,triple=2pt}
+%  
+% You can\stydsc{line-style= dash-dot-dot, triple=2pt} draw multiple,
+% adjacent copies of any rule by setting the number of times to draw the rule
+% with the \kvdesc{repeat} key. The space between copies is controlled with the
+% \kvdesc{repeat-distance} key. Initially, this distance is set to
+% \cs{columnseprule}.
+%  
+% The keys \kvdesc{single}, \kvdesc{double}, and \kvdesc{triple} are shorthand
+% methods to set the number of repeats and the \kvdesc{repeat-distance} at the
+% same time. If use the key without a value \kvdesc{repeat-distance} is set to 
+% \cs{columnseprule}.
+%
+% There are no checks made to ensure that repeated rules will fit in the
+% available space between columns, so you should be careful using these
+% commands, especially with thicker rules.
+% \end{multicols}
+%
+%\StopEventually{^^A
+%  \PrintChanges
+%  \clearpage
+%  \PrintIndex
+%}
+%
+% \section{Implementation}
+%
+%    \begin{macrocode}
+%<*package>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<@@=mcrule>
+%    \end{macrocode}
+%
+%\subsection{Preliminaries}
+%
+%    \begin{macrocode}
+\ProvidesExplPackage {multicolrule} {2018/12/18} {1.0}
+{Decorative~vertical~rules~between~columns}
+%    \end{macrocode}
+%
+% We always need these packages.
+%    \begin{macrocode}
+\RequirePackage{l3keys2e}
+\RequirePackage{xpatch}
+\RequirePackage{xcolor}
+%    \end{macrocode}
+%
+% Define the messages we use.
+%    \begin{macrocode}
+\msg_new:nnn {multicolrule} {patch-success} {Patched~#1.}
+\msg_new:nnn {multicolrule} {patch-failure} {Error~patching~#1.}
+\msg_new:nnn {multicolrule} {tikz-required}
+{The~'#1'~setting~requires~tikz~to~work.~Either~load~tikz~before~you~load~
+  multicolrule~or~use~multicolrule's~'tikz'~package~option.}
+\msg_new:nnn {multicolrule} {multicol-loaded} {You~are~using~the~'twocolumn'~
+  option~with~multicol~already~loaded.~You~will~likely~run~into~problems.}
+%    \end{macrocode}
+%
+%\begin{variable}{\g_@@_twocolumn_bool}
+% Use traditional two-column mode rather than \pkg{multicol}
+%    \begin{macrocode}
+\bool_new:N \g_@@_twocolumn_bool
+%    \end{macrocode}
+%\end{variable}
+%
+%\begin{variable}{\g_@@_use_tikz_bool}
+% Support drawing rules with \pkg{tikz}
+%    \begin{macrocode}
+\bool_new:N \g_@@_use_tikz_bool
+%    \end{macrocode}
+%\end{variable}
+%
+%\begin{variable}{\l_@@_repeat_int}
+% Number of times to copy the rule.
+%    \begin{macrocode}
+\int_new:N \l_@@_repeat_int
+\int_set:Nn \l_@@_repeat_int {1}
+%    \end{macrocode}
+%\end{variable}
+%
+%\begin{variable}{\l_@@_repeat_distance_dim}
+% Separation between multiple copies of the rule.
+%    \begin{macrocode}
+\dim_new:N \l_@@_repeat_distance_dim
+%    \end{macrocode}
+%\end{variable}
+%
+%\begin{variable}{\l_@@_color_name_tl,\l_@@_color_model_tl}
+% Keep name and color model so we can set them separately while retaining
+% the value of the other one.
+%    \begin{macrocode}
+\tl_new:N \l_@@_color_name_tl
+\tl_new:N \l_@@_color_model_tl
+%    \end{macrocode}
+%\end{variable}
+%
+% If \pkg{tikz} is already loaded, enable \pkg{tikz}-sensitive line styles
+% unless the user explicitly disables them. If \pkg{tikz} is not already
+% loaded, these functions are disabled unless they are explicitly loaded.
+%
+%    \begin{macrocode}
+\@ifpackageloaded{tikz}
+{
+  \bool_gset_true:N \g_@@_use_tikz_bool
+}{}
+%    \end{macrocode}
+%
+% Set up the keys for package options and process them.
+%
+%    \begin{macrocode}
+\keys_define:nn {mcrule-opts}
+{
+  twocolumn .bool_gset:N = \g_@@_twocolumn_bool,
+  tikz      .bool_gset:N = \g_@@_use_tikz_bool,
+  tikz      .default:n   = true,
+}
+\ProcessKeysOptions{mcrule-opts}
+%    \end{macrocode}
+%
+% \subsection{Patching Output Routines}
+%
+%\begin{function}{\@@_col_box:}
+% Holds a reference to the box appropriate to the supported mode. We'll use
+% this when we need to know the height of the columns.
+%
+%    \begin{macrocode}
+\cs_new:Npn \@@_col_box: {}
+%    \end{macrocode}
+%\end{function}
+%
+% Now that we know what mode we're going to run in, we patch the output routine
+% to substitute our custom rule for the vanilla one. Since \pkg{multicol}
+% doesn't fully support twocolumn mode, we patch one or the other, but not
+% both.
+% 
+%    \begin{macrocode}
+\bool_if:NTF \g_@@_twocolumn_bool
+{
+  \@ifpackageloaded{multicol}
+  {
+    \msg_warning:nn {multicolrule} {multicol-loaded}  
+  }
+%    \end{macrocode}
+% Provide the column-color macro from \pkg{multicol}.
+%    \begin{macrocode}
+  \cs_gset:Npn \columnseprulecolor {\normalcolor}
+  \cs_gset:Npn \@@_col_box: {\@outputbox}
+%    \end{macrocode}
+% Now patch the relevant code in |\@outputdblcol|, replacing the hard-coded
+% rule with a macro that we can overwrite
+%    \begin{macrocode}
+  \xpatchcmd{\@outputdblcol} {\normalcolor\vrule\@width\columnseprule}
+  {\columnseprulecolor\mcruledivider}
+  {
+    \msg_info:nnn {multicolrule} {patch-success} {\@outputdblcol}
+  }
+  {
+    \msg_info:nnn {multicolrule} {patch-failure} {\@outputdblcol}
+  }
+}
+{
+%    \end{macrocode}
+%
+% The patching for \pkg{multicol} is essentially the same as that for \LaTeX's
+% normal |twocolumn| mode, except we ensure that \pkg{multicol} is present and
+% we have two output routines to patch: one for LTR and the other for RTL
+% printing.
+%
+%    \begin{macrocode}
+  \RequirePackage{multicol}
+  \cs_gset:Npn \@@_col_box: {\mult@rightbox}
+  % Patch the code in multicol that creates the vertical rule.
+  \xpatchcmd{\LR@column@boxes} {\vrule\@width\columnseprule} {\mcruledivider}
+  {\msg_info:nnn {multicolrule} {patch-success} {\LR@column@boxes}}
+  {\msg_info:nnn {multicolrule} {patch-failure} {\LR@column@boxes}}
+  \xpatchcmd{\RL@column@boxes} {\vrule\@width\columnseprule} {\mcruledivider}
+  {\msg_info:nnn {multicolrule} {patch-success} {\RL@column@boxes}}
+  {\msg_info:nnn {multicolrule} {patch-failure} {\RL@column@boxes}}
+%    \end{macrocode}
+%
+% Reissue \cs{LRmulticolcolumns} to update the actual code
+% in \cmd{\mc@align@columns}.
+%
+%    \begin{macrocode}
+  \LRmulticolcolumns
+}
+%    \end{macrocode}
+%
+% \subsection{Creating the Rules}
+% Utility functions for different rule types
+%
+%\begin{macro}{\mcruledivider}
+% This is the function directly called by the patched \pkg{multicol} routines.
+% It's given a \LaTeX2 name so the user can redefine it if necessary. Its main
+% function is to call the internal function \cs{_@@_divider:}, which contains the
+% actual rule-typesetting instructions, the number of times specified in
+% \cs{l_@@_repeat_int}. We only call \cs{_@@_divider:} if \cs{columnseprule} $>0$, 
+% so that all line styles can be turned off by setting it to 0, just as is the
+% case with the vanilla rules.
+%
+%    \begin{macrocode}
+\cs_new:Npn \mcruledivider
+{
+  \bool_lazy_and:nnT
+  {\dim_compare_p:nNn {\columnseprule} > {0pt}}
+  {\int_compare_p:nNn {\l_@@_repeat_int} > {0}}
+  {
+    \_@@_divider:
+    \prg_replicate:nn {\l_@@_repeat_int - 1}
+    {
+      \hspace{\l_@@_repeat_distance_dim}
+      \_@@_divider:
+    }
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{function}{\_@@_divider:}
+% This is the internal routine that contains the instructions to draw one copy
+% of rule between columns. The default is identical to the original definition
+% used by \pkg{multicol}. It will be reset each time the user calls
+% |\MCSetRule|.
+%
+%    \begin{macrocode}
+\cs_new:Npn \_@@_divider: {\vrule\@width\columnseprule}
+%    \end{macrocode}
+%\end{function}
+%
+%\begin{function}{\@@_pattern:nnn}
+%  \begin{syntax}
+%    |\__mcrule_pattern:nnn| \Arg{pattern} \Arg{space above} \Arg{space below}
+%  \end{syntax}
+% Typesets a single copy of a pattern, vertically centered, in a vertical
+% box that is the height of the current column. The pattern must be
+% something that can go in a horizontal box. The spaces above and below
+% must be fixed dimensions. 
+% 
+%    \begin{macrocode}
+\cs_new_nopar:Npn \@@_pattern:nnn #1#2#3
+{
+  \vbox_to_ht:nn {\box_ht:N \@@_col_box:}
+  { \vfill
+    \kern #2 \hbox:n{#1} \kern #3
+    \vfill
+  }
+}
+%    \end{macrocode}
+%\end{function}
+%
+%\begin{function}{\@@_tile_pattern:nnn}
+%  \begin{syntax}
+%    |\__mcrule_tile_pattern:nnn| \Arg{pattern} \Arg{space above} \Arg{space below}
+%  \end{syntax}
+% Typesets multiple copies of pattern, tiled so as to occupy a vertical box
+% that is the height of the current column. The pattern must be something
+% that can go in a horizontal box. The spaces above and below must be fixed
+% dimensions. 
+%    \begin{macrocode}
+\cs_new_nopar:Npn \@@_tile_pattern:nnn #1#2#3
+{
+  \vbox_to_ht:nn {\box_ht:N \@@_col_box:}
+  {
+    \cleaders \vbox:n {
+      \kern #2 \hbox:n{#1} \kern #3
+    }\vfill
+  }
+}
+%    \end{macrocode}
+%\end{function}
+%
+%\begin{function}{\@@_line_pattern:nnnn}
+%  \begin{syntax}
+%    |\__mcrule_line_pattern:nnnn| \Arg{tikz-name} \Arg{height} \Arg{space above}
+%      \Arg{space below}
+%  \end{syntax}
+% This function can draw a line pattern using either a \pkg{tikz} name or
+% directly (as a tiled pattern). The latter case is currently limited to line
+% patterns that can be described in terms of a solid line of length
+% \meta{height} separated by spaces above and/or below the line.
+%    \begin{macrocode}
+\cs_new:Npn \@@_line_pattern:nnnn #1#2#3#4
+{
+  \bool_if:NTF \g_@@_use_tikz_bool
+  {
+    \@@_pattern_line:n {#1}
+  } 
+  {
+    \@@_tile_pattern:nnn {\rule{\columnseprule}{#2}}{#3}{#4}
+  }
+}
+%    \end{macrocode}
+%\end{function}
+%
+% \subsubsection{Tikz-only Routines}
+%
+% If we're supporting \pkg{tikz}, make sure it's loaded and redefine the
+% relevant functions. We turn off |expl3| syntax to load the package because
+% \pkg{tikz} relies on 2e catcodes, especially for spaces.
+%
+%    \begin{macrocode}
+\bool_if:NTF \g_@@_use_tikz_bool
+{
+  \ExplSyntaxOff
+  \RequirePackage{tikz}
+  \ExplSyntaxOn  
+%    \end{macrocode}
+% 
+%\begin{function}{\@@_tikz_picture:n, \@@_tikz_picture:nn}
+%  \begin{syntax}
+%    |\__mcrule_tikz_picture:n| \Arg{draw function}
+%  \end{syntax}
+% Set up the \env{tikzpicture} environment and declare two nodes, named |(TOP)|
+% and |(BOT)|. This way we can pass a \cs{draw} routine directly,
+% without worrying about the line's coordinates. We do a two-step call here to
+% force expansion of the second argument in a way that \pkg{tikz} likes.
+%
+%    \begin{macrocode}
+  \cs_set:Npn \@@_tikz_picture:n #1
+  {
+    \@@_tikz_picture:nx {#1} {\@@_col_box:}
+  }
+  \cs_set:Npn \@@_tikz_picture:nn #1#2
+  {
+    \begin{tikzpicture}[x=1pt,y=1pt,inner~sep=0pt,outer~sep=0pt]
+    \node (TOP) at (0,\ht#2) {};
+    \node (BOT) at (0,0) {};
+    #1
+    \end{tikzpicture}
+  }
+  \cs_generate_variant:Nn \@@_tikz_picture:nn {nx}  
+%    \end{macrocode}
+%\end{function}
+%
+%\begin{function}{\@@_pattern_line:n,\@@_pattern_line:nn}
+%  \begin{syntax}
+%    |\__mcrule_pattern_line:n| \Arg{tikz pattern}
+%  \end{syntax}
+% For the \pkg{tikz} versions of the predefined lines, we just draw
+% a line the length of the column box. \meta{tikz pattern} should 
+% contain the name of a line style that \pkg{tikz} recognizes.
+%
+%    \begin{macrocode}
+  \cs_set:Npn \@@_pattern_line:n #1
+  {
+    \@@_pattern_line:nx {#1} {\@@_col_box:}
+  }
+  \cs_set:Npn \@@_pattern_line:nn #1#2
+  {
+    \begin{tikzpicture}[x=1pt,y=1pt,inner~sep=0pt,outer~sep=0pt]
+    \draw[line~width=\columnseprule,#1] (0,\ht#2) -- (0,0);
+    \end{tikzpicture}
+  }
+  \cs_generate_variant:Nn \@@_pattern_line:nn {nx}
+%    \end{macrocode}
+%\end{function}
+%
+%\begin{function}{\@@_circle:}
+% Draw a hollow circle with a diameter equal to |\columnseprule|. This will be
+% used as a tile pattern.
+%
+%    \begin{macrocode}
+  \cs_set:Npn \@@_circle: 
+  {
+    \begin{tikzpicture}[x=1pt,y=1pt,inner~sep=0pt,outer~sep=0pt]
+    \draw (0,0) circle[radius=.5\columnseprule];
+    \end{tikzpicture}
+  }
+%    \end{macrocode}
+%\end{function}
+%
+%\begin{function}{\@@_solid_circle:}
+% Draw a filled circle with a diameter equal to |\columnseprule|. This will be
+% used as a tile pattern.
+%
+%    \begin{macrocode} 
+  \cs_set:Npn \@@_solid_circle: 
+  {
+    \begin{tikzpicture}[x=1pt,y=1pt,inner~sep=0pt,outer~sep=0pt]
+    \fill (0,0) circle[radius=.5\columnseprule];
+    \end{tikzpicture}
+  } 
+}
+%    \end{macrocode}
+%\end{function}
+%
+% In case \pkg{tikz} functions are not active, we provide stubs
+% that issue error messages.
+%
+%    \begin{macrocode}
+{
+  \cs_set:Npn \@@_tikz_picture:n #1
+    {\msg_error:nnn {multicolrule} {tikz-required} {#1}}
+  \cs_new:Npn \@@_pattern_line:n #1
+    {\msg_error:nnn {multicolrule} {tikz-required} {#1}}
+  \cs_new:Npn \@@_circle: 
+    {\msg_error:nnn {multicolrule} {tikz-required} {circles}}
+  \cs_new:Npn \@@_solid_circle: 
+    {\msg_error:nnn {multicolrule} {tikz-required} {solid-circles}}
+}
+%    \end{macrocode}
+%
+% \subsection{Color}
+%\begin{function}{\_@@_set_rule_color:}
+% Reset color definition in \cs{columnseprulecolor} by name or
+% by model and color specification.
+%
+%    \begin{macrocode}
+\cs_new_protected:Npn \_@@_set_rule_color:
+{
+  \tl_if_empty:NT \l_@@_color_name_tl
+  {
+    \tl_set:Nn \l_@@_color_name_tl {black}
+  }
+  \tl_if_empty:NTF \l_@@_color_model_tl
+  {
+    \cs_set:Npn \columnseprulecolor {\color{\l_@@_color_name_tl}}
+  }
+  {
+    \cs_set:Npn \columnseprulecolor 
+    {\color[\l_@@_color_model_tl]{\l_@@_color_name_tl}}
+  }
+}
+%    \end{macrocode}
+%\end{function}
+%
+% \subsection{Key-Values}
+% Set up all the key definitions. For the line styles, this involves
+% resetting \cs{_@@_divider:} to an appropriate value.
+%
+%    \begin{macrocode}
+\keys_define:nn {mcrule}
+{
+  line-style .choice:,
+  line-style / solid .code:n = \cs_set:Npn \_@@_divider: 
+    {\vrule\@width\columnseprule},
+  line-style / dots .code:n = \cs_set:Npn \_@@_divider:
+    {\@@_tile_pattern:nnn {.}{1pt}{1pt}},
+  line-style / dense-dots .code:n = \cs_set:Npn \_@@_divider: 
+    {\@@_tile_pattern:nnn {.}{1pt}{0pt}},
+  line-style / loose-dots .code:n = \cs_set:Npn \_@@_divider:
+    {\@@_tile_pattern:nnn {.}{2pt}{2pt}},
+  line-style / circles .code:n = \cs_set:Npn \_@@_divider: 
+    {\@@_tile_pattern:nnn {\@@_circle:}{1pt}{1pt}},
+  line-style / dense-circles .code:n = \cs_set:Npn \_@@_divider:
+    {\@@_tile_pattern:nnn {\@@_circle:}{1pt}{0pt}},
+  line-style / loose-circles .code:n = \cs_set:Npn \_@@_divider: 
+    {\@@_tile_pattern:nnn {\@@_circle:}{2pt}{2pt}},
+  line-style / solid-circles .code:n = \cs_set:Npn \_@@_divider: 
+    {\@@_tile_pattern:nnn {\@@_solid_circle:}{1pt}{1pt}},
+  line-style / dense-solid-circles .code:n = \cs_set:Npn \_@@_divider:
+    {\@@_tile_pattern:nnn {\@@_solid_circle:}{1pt}{0pt}},
+  line-style / loose-solid-circles .code:n = \cs_set:Npn \_@@_divider:
+    {\@@_tile_pattern:nnn {\@@_solid_circle:}{2pt}{2pt}},
+  line-style / dotted .code:n = \cs_set:Npn \_@@_divider: 
+    {\@@_line_pattern:nnnn {dotted}{\columnseprule}{1pt}{1pt}},
+  line-style / densely-dotted .code:n = \cs_set:Npn \_@@_divider:
+    {\@@_line_pattern:nnnn {densely~dotted}{\columnseprule}{1pt}{0pt}},
+  line-style / loosely-dotted .code:n = \cs_set:Npn \_@@_divider:
+    {\@@_line_pattern:nnnn {loosely~dotted}{\columnseprule}{2pt}{2pt}},
+  line-style / dashed .code:n = \cs_set:Npn \_@@_divider:
+    {\@@_line_pattern:nnnn {dashed}{3pt}{1.5pt}{1.5pt}},
+  line-style / densely-dashed .code:n = \cs_set:Npn \_@@_divider:
+    {\@@_line_pattern:nnnn {densely~dashed}{3pt}{1pt}{1pt}},
+  line-style / loosely-dashed .code:n = \cs_set:Npn \_@@_divider: 
+    {\@@_line_pattern:nnnn {loosely~dashed}{3pt}{3pt}{3pt}},
+  line-style / dash-dot .code:n =
+    \cs_set:Npn \_@@_divider: {\@@_pattern_line:n{dash~dot}},
+  line-style / densely-dash-dot .code:n =
+    \cs_set:Npn \_@@_divider: {\@@_pattern_line:n{densely~dash~dot}},
+  line-style / loosely-dash-dot .code:n =
+    \cs_set:Npn \_@@_divider: {\@@_pattern_line:n{loosely~dash~dot}},
+  line-style / dash-dot-dot .code:n =
+    \cs_set:Npn \_@@_divider: {\@@_pattern_line:n{dash~dot~dot}},
+  line-style / densely-dash-dot-dot .code:n =
+    \cs_set:Npn \_@@_divider: {\@@_pattern_line:n{densely~dash~dot~dot}},
+  line-style / loosely-dash-dot-dot .code:n =
+    \cs_set:Npn \_@@_divider: {\@@_pattern_line:n{loosely~dash~dot~dot}},
+  color .code:n = {
+    \tl_set:Nn \l_@@_color_name_tl {#1}
+    \_@@_set_rule_color:
+  },
+  color-model .code:n = {
+    \tl_set:Nn \l_@@_color_model_tl {#1}
+    \_@@_set_rule_color:
+  },
+  custom-line .code:n = \cs_set:Npn \_@@_divider:
+    {\@@_tikz_picture:n {#1}},
+  custom-pattern .code:n = \cs_set:Npn \_@@_divider:
+    {\@@_pattern:nnn #1},
+  custom-tile .code:n = \cs_set:Npn \_@@_divider:
+    {\@@_tile_pattern:nnn #1},
+  width .choice:,
+  width / ultra-thin  .code:n = \dim_set:Nn \columnseprule {0.1pt},
+  width / very-thin   .code:n = \dim_set:Nn \columnseprule {0.2pt},
+  width / thin        .code:n = \dim_set:Nn \columnseprule {0.4pt},
+  width / semithick   .code:n = \dim_set:Nn \columnseprule {0.6pt},
+  width / thick       .code:n = \dim_set:Nn \columnseprule {0.8pt},
+  width / very-thick  .code:n = \dim_set:Nn \columnseprule {1.2pt},
+  width / ultra-thick .code:n = \dim_set:Nn \columnseprule {1.6pt},
+  width / unknown     .code:n = {\dim_set:Nn \columnseprule {#1}},
+  repeat              .int_set:N = \l_@@_repeat_int,
+  repeat-distance     .dim_set:N = \l_@@_repeat_distance_dim,
+  single              .meta:n = {
+    repeat = 1,
+    repeat-distance = #1
+  },
+  single              .default:n = \columnseprule,
+  double              .meta:n = {
+    repeat = 2,
+    repeat-distance = #1
+  },
+  double              .default:n = \columnseprule,
+  triple              .meta:n = {
+    repeat = 3,
+    repeat-distance = #1
+  },
+  triple              .default:n = \columnseprule,
+}
+%    \end{macrocode}
+%
+% \subsection{User Interface}
+% With only one command, this section is short. All we do is set whatever keys
+% the user passes. All the real work is done in the definitions above.
+%
+%\begin{macro}{\SetMCRule}
+%\begin{syntax}
+%  |\SetMCRule| \marg{key-value list}
+%\end{syntax}
+%    \begin{macrocode}
+\NewDocumentCommand{\SetMCRule}{m}
+{
+  \keys_set:nn {mcrule} {#1}
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\Finale

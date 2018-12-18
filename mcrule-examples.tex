@@ -1,0 +1,159 @@
+\documentclass{article}
+\usepackage[tikz]{multicolrule}
+\usepackage{lipsum}
+\usepackage{bbding}
+\usepackage{pgfornament}
+\setlength{\columnsep}{24pt}
+\setlength{\columnseprule}{.5pt}
+\begin{document}
+
+\section*{Style Gallery}
+This file gives brief examples covering all the defined line styles and
+other functions available in \texttt{multicolrule}. See the documentation
+for instructions on how to set them in your own documents.
+
+\subsection*{Works without Tikz}
+\begin{multicols}{2}[Default (solid)]
+\lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Double (+ color test)]
+  \SetMCRule{color=red,double=2pt}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Triple (+ color-model test)]
+  \SetMCRule{triple=2pt,color-model=cmy,color={0.7,0.5,0.3}}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Dots]
+\SetMCRule{line-style=dots}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Dense Dots]
+  \SetMCRule{line-style=dense-dots}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Loose Dots]
+  \SetMCRule{line-style=loose-dots}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Dashed (ultra-thin)]
+  \SetMCRule{width=ultra-thin,line-style=dashed}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Densely Dashed (very-thin)]
+  \SetMCRule{width=very-thin,line-style=densely-dashed}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Loosely Dashed (thin)]
+  \SetMCRule{width=thin,line-style=loosely-dashed}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Dotted (semithick)]
+  \SetMCRule{width=semithick,line-style=dotted}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Densely Dotted (thick)]
+  \SetMCRule{width=thick,line-style=densely-dotted}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Loosely Dotted (very thick)]
+  \SetMCRule{width=very-thick,line-style=loosely-dotted}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Custom Tile]
+  \SetMCRule{custom-tile={\SparkleBold}{12pt}{12pt}}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Custom Pattern]
+  \SetMCRule{custom-pattern={\HandRight}{0pt}{0pt}}
+  \lipsum[1]
+\end{multicols}
+
+
+\subsection*{Tikz Only}
+\begin{multicols}{2}[Circles]
+  \SetMCRule{width=3pt,line-style=circles}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Dense Circles]
+  \SetMCRule{width=3pt,line-style=dense-circles}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Loose Circles]
+  \SetMCRule{width=3pt,line-style=loose-circles}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Solid Circles]
+  \SetMCRule{width=3pt,line-style=solid-circles}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Dense Solid Circles]
+  \SetMCRule{width=3pt,line-style=dense-solid-circles}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Loose Solid Circles]
+  \SetMCRule{width=3pt,line-style=loose-solid-circles}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Dash-Dot (ultra-thick)]
+  \SetMCRule{width=ultra-thick,line-style=dash-dot}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Densely Dash-Dot]
+  \SetMCRule{line-style=densely-dash-dot}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Loosely Dash-Dot]
+  \SetMCRule{line-style=loosely-dash-dot}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Dash-Dot-Dot]
+  \SetMCRule{line-style=dash-dot-dot}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Densely Dash-Dot-Dot]
+  \SetMCRule{line-style=densely-dash-dot-dot}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Loosely Dash-Dot-Dot]
+  \SetMCRule{line-style=loosely-dash-dot-dot}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Custom Line]
+  \SetMCRule{width=1pt,custom-line={\draw[line width=\columnseprule] (TOP) to [ornament=88] (BOT);}}
+  \lipsum[1]
+\end{multicols}
+
+\setlength{\columnsep}{50pt}
+
+\begin{multicols}{2}[Custom Line (+ 4 repeats), just because we can]
+  \SetMCRule{repeat=4,repeat-distance=4pt,width=1pt,custom-line={\draw[line width=\columnseprule] (TOP) to [ornament=88] (BOT);}}
+  \lipsum[1]
+\end{multicols}
+
+\end{document}
