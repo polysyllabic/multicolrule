@@ -1,7 +1,7 @@
 % !TeX program = xelatex
 \documentclass{article}
 \usepackage{fontspec}
-\usepackage[tikz]{multicolrule}[2018/12/19]
+\usepackage[tikz]{multicolrule}[2018/12/20]
 \usepackage{lipsum}
 \usepackage{bbding}
 \usepackage{pgfornament}
@@ -16,8 +16,13 @@ other functions available in \texttt{multicolrule}. See the documentation
 for instructions on how to set them in your own documents.
 
 \subsection*{Works without Tikz}
-\begin{multicols}{2}[Default (solid)]
+\begin{multicols}{2}[Default]
 \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Solid]
+  \SetMCRule{line-style=solid}
+  \lipsum[1]
 \end{multicols}
 
 \begin{multicols}{2}[Double (+ color test)]
@@ -158,6 +163,24 @@ for instructions on how to set them in your own documents.
   \lipsum[1]
 \end{multicols}
 
+\subsection*{Extended Rules}
+
+\begin{multicols}{2}[Solid -- extend bottom 16pt]
+  \SetMCRule{line-style=solid,extend-bot=16pt}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Dots -- extend top 16pt]
+  \SetMCRule{line-style=dots,extend-top=16pt}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Dashed -- shrink both 16pt]
+  \SetMCRule{line-style=dashed,extend-top=-16pt,extend-bot=-16pt}
+  \lipsum[1]
+\end{multicols}
+
+
 \subsection*{RTL Test}
 
   \RLmulticolcolumns
@@ -169,7 +192,7 @@ for instructions on how to set them in your own documents.
 
 \begin{RTL}
   \begin{multicols}{2}[Mode RTL Full]
-    \SetMCRule{custom-tile={+}{8pt}{8pt}}
+    \SetMCRule{line-style=dashed}
     \lipsum[1]
   \end{multicols}
 \end{RTL}

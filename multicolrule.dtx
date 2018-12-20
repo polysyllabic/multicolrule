@@ -21,12 +21,15 @@ This package is provided as a .dtx file. To install it and
 compile the documentation at the same time, simply process the
 .dtx file with LaTeX (for example, `pdflatex multicolrule.dtx`).
 To extract the package only, process the file with TeX 
-(`tex multicolrule.dtx`). If you have trouble compiling the
-index for the documentation, note that the documentation uses
-the l3doc class to index the code, and so the makeindex command
-should be the following:
+(`tex multicolrule.dtx`). Note that the documentation uses
+the l3doc class to index the code, and so to get the index, you
+must issue:
 
 `makeindex -s gind.ist -o multicolrule.ind multicolrule.idx`
+
+and to get the change list, you must issue
+
+`makeindex -s gglo.ist -o multicolrule.gls multicolrule.glo`.
 
 This package requires LaTeX3 support to run, and compiling the
 documentation requires a variety of other packages, all of which
@@ -163,7 +166,7 @@ and the derived files           multicolrule.ins,
 %\maketitle
 %
 %\changes{v1.0}{2018/12/15}{Initial public release}
-%\changes{v1.1}{2018/12/19}{Work with \pkg{bidi}}
+%\changes{v1.1}{2018/12/20}{Work with \pkg{bidi} and allow extending rules}
 %
 %\begin{abstract}
 % The \mcrule{} package lets you customize the appearance of the vertical rule
@@ -176,6 +179,8 @@ and the derived files           multicolrule.ins,
 %\end{abstract}
 %
 %\tableofcontents
+%
+%\begin{documentation}
 %
 %\begin{multicols}{2}[\section{Introduction}]
 %\SetMCRule{line-style=dashed}
@@ -601,13 +606,11 @@ and the derived files           multicolrule.ins,
 % commands, especially with thicker rules.
 % \end{multicols}
 %
-%\StopEventually{^^A
-%  \PrintChanges
-%  \clearpage
-%  \PrintIndex
-%}
+%\end{documentation}
 %
-% \section{Implementation}
+%\begin{implementation}
+%
+%\section{Implementation}
 %
 %    \begin{macrocode}
 %<*package>
@@ -620,7 +623,7 @@ and the derived files           multicolrule.ins,
 %\subsection{Preliminaries}
 %
 %    \begin{macrocode}
-\ProvidesExplPackage {multicolrule} {2018/12/19} {1.1}
+\ProvidesExplPackage {multicolrule} {2018/12/20} {1.1}
 {Decorative~vertical~rules~between~columns}
 %    \end{macrocode}
 %
@@ -669,6 +672,14 @@ and the derived files           multicolrule.ins,
 % Separation between multiple copies of the rule.
 %    \begin{macrocode}
 \dim_new:N \l_@@_repeat_distance_dim
+%    \end{macrocode}
+%\end{variable}
+%
+%\begin{variable}{\l_@@_extend_top_dim,\l_@@_extend_bot_dim}
+% Distance to extend rule above and below the natural column height.
+%    \begin{macrocode}
+\dim_new:N \l_@@_extend_top_dim
+\dim_new:N \l_@@_extend_bot_dim
 %    \end{macrocode}
 %\end{variable}
 %
@@ -841,25 +852,41 @@ and the derived files           multicolrule.ins,
   {\dim_compare_p:nNn {\columnseprule} > {0pt}}
   {\int_compare_p:nNn {\l_@@_repeat_int} > {0}}
   {
-    \_@@_divider:
+    \@@_divider:
     \prg_replicate:nn {\l_@@_repeat_int - 1}
     {
       \hspace{\l_@@_repeat_distance_dim}
-      \_@@_divider:
+      \@@_divider:
     }
   }
 }
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{function}{\_@@_divider:}
+%\begin{function}{\@@_column_total_height:,\@@_column_depth:}
+% \changes{v1.1}{2018/12/20}{Added to extend rules by specified lengths}
+%
+%    \begin{macrocode}
+\cs_new:Npn \@@_column_total_height:
+{
+  \dim_eval:n {\box_dp:N \@@_col_box: + \box_ht:N \@@_col_box: + 
+    \l_@@_extend_top_dim + \l_@@_extend_bot_dim}
+}
+\cs_new:Npn \@@_column_depth:
+{
+  \dim_eval:n {\box_dp:N \@@_col_box: + \l_@@_extend_bot_dim}
+}
+%    \end{macrocode}
+%\end{function}
+%
+%\begin{function}{\@@_divider:}
 % This is the internal routine that contains the instructions to draw one copy
 % of rule between columns. The default is identical to the original definition
 % used by \pkg{multicol}. It will be reset each time the user calls
 % |\MCSetRule|.
 %
 %    \begin{macrocode}
-\cs_new:Npn \_@@_divider: {\vrule\@width\columnseprule}
+\cs_new:Npn \@@_divider: {\vrule\@width\columnseprule}
 %    \end{macrocode}
 %\end{function}
 %
@@ -875,10 +902,14 @@ and the derived files           multicolrule.ins,
 %    \begin{macrocode}
 \cs_new_nopar:Npn \@@_pattern:nnn #1#2#3
 {
-  \vbox_to_ht:nn {\box_ht:N \@@_col_box:}
-  { \vfill
-    \kern #2 \hbox:n{#1} \kern #3
-    \vfill
+  \box_move_down:nn {\@@_column_depth:}
+  {
+    \vbox_to_ht:nn {\@@_column_total_height:}
+    {
+      \vfill
+      \kern #2 \hbox:n{#1} \kern #3
+      \vfill
+    }
   }
 }
 %    \end{macrocode}
@@ -895,11 +926,16 @@ and the derived files           multicolrule.ins,
 %    \begin{macrocode}
 \cs_new_nopar:Npn \@@_tile_pattern:nnn #1#2#3
 {
-  \vbox_to_ht:nn {\box_ht:N \@@_col_box:}
+  \box_move_down:nn {\@@_column_depth:}
   {
-    \cleaders \vbox:n {
-      \kern #2 \hbox:n{#1} \kern #3
-    }\vfill
+    \vbox_to_ht:nn {\@@_column_total_height:}
+    {
+      \cleaders \vbox:n
+      {
+        \kern #2 \hbox:n{#1} \kern #3
+      }
+    \vfill
+    }
   }
 }
 %    \end{macrocode}
@@ -924,6 +960,18 @@ and the derived files           multicolrule.ins,
   {
     \@@_tile_pattern:nnn {\rule{\columnseprule}{#2}}{#3}{#4}
   }
+}
+%    \end{macrocode}
+%\end{function}
+%
+%\begin{function}{\@@_solid_line:}
+% Unlike the default solid line, which is created with a simple \tn{vrule},
+% this version allows us to extend the line beyond the natural space of the
+% column.
+%    \begin{macrocode}
+\cs_new:Npn \@@_solid_line:
+{
+  \rule[-\@@_column_depth:]{\columnseprule}{\@@_column_total_height:}
 }
 %    \end{macrocode}
 %\end{function}
@@ -958,8 +1006,9 @@ and the derived files           multicolrule.ins,
   }
   \cs_set:Npn \@@_tikz_picture:nn #1#2
   {
-    \begin{tikzpicture}[x=1pt,y=1pt,inner~sep=0pt,outer~sep=0pt]
-    \node (TOP) at (0,\ht#2) {};
+    \begin{tikzpicture}[x=1pt,y=1pt,inner~sep=0pt,outer~sep=0pt,
+      baseline={([yshift=\@@_column_depth:]current~bounding~box.south)}]
+    \node (TOP) at (0,\@@_column_total_height:) {};
     \node (BOT) at (0,0) {};
     #1
     \end{tikzpicture}
@@ -983,8 +1032,9 @@ and the derived files           multicolrule.ins,
   }
   \cs_set:Npn \@@_pattern_line:nn #1#2
   {
-    \begin{tikzpicture}[x=1pt,y=1pt,inner~sep=0pt,outer~sep=0pt]
-    \draw[line~width=\columnseprule,#1] (0,\ht#2) -- (0,0);
+    \begin{tikzpicture}[x=1pt,y=1pt,inner~sep=0pt,outer~sep=0pt,
+      baseline={([yshift=\@@_column_depth:]current~bounding~box.south)}]
+    \draw[line~width=\columnseprule,#1] (0,\@@_column_total_height:) -- (0,0);
     \end{tikzpicture}
   }
   \cs_generate_variant:Nn \@@_pattern_line:nn {nx}
@@ -1037,12 +1087,12 @@ and the derived files           multicolrule.ins,
 %    \end{macrocode}
 %
 % \subsection{Color}
-%\begin{function}{\_@@_set_rule_color:}
+%\begin{function}{\@@_set_rule_color:}
 % Reset color definition in \cs{columnseprulecolor} by name or
 % by model and color specification.
 %
 %    \begin{macrocode}
-\cs_new_protected:Npn \_@@_set_rule_color:
+\cs_new_protected:Npn \@@_set_rule_color:
 {
   \tl_if_empty:NT \l_@@_color_name_tl
   {
@@ -1067,64 +1117,68 @@ and the derived files           multicolrule.ins,
 %    \begin{macrocode}
 \keys_define:nn {mcrule}
 {
+  extend-top .dim_set:N = \l_@@_extend_top_dim,
+  extend-bot .dim_set:N = \l_@@_extend_bot_dim,
   line-style .choice:,
-  line-style / solid .code:n = \cs_set:Npn \_@@_divider: 
+  line-style / default .code:n = \cs_set:Npn \@@_divider: 
     {\vrule\@width\columnseprule},
-  line-style / dots .code:n = \cs_set:Npn \_@@_divider:
+  line-style / solid .code:n = \cs_set:Npn \@@_divider: 
+    {\@@_solid_line:},
+  line-style / dots .code:n = \cs_set:Npn \@@_divider:
     {\@@_tile_pattern:nnn {.}{1pt}{1pt}},
-  line-style / dense-dots .code:n = \cs_set:Npn \_@@_divider: 
+  line-style / dense-dots .code:n = \cs_set:Npn \@@_divider: 
     {\@@_tile_pattern:nnn {.}{1pt}{0pt}},
-  line-style / loose-dots .code:n = \cs_set:Npn \_@@_divider:
+  line-style / loose-dots .code:n = \cs_set:Npn \@@_divider:
     {\@@_tile_pattern:nnn {.}{2pt}{2pt}},
-  line-style / circles .code:n = \cs_set:Npn \_@@_divider: 
+  line-style / circles .code:n = \cs_set:Npn \@@_divider: 
     {\@@_tile_pattern:nnn {\@@_circle:}{1pt}{1pt}},
-  line-style / dense-circles .code:n = \cs_set:Npn \_@@_divider:
+  line-style / dense-circles .code:n = \cs_set:Npn \@@_divider:
     {\@@_tile_pattern:nnn {\@@_circle:}{1pt}{0pt}},
-  line-style / loose-circles .code:n = \cs_set:Npn \_@@_divider: 
+  line-style / loose-circles .code:n = \cs_set:Npn \@@_divider: 
     {\@@_tile_pattern:nnn {\@@_circle:}{2pt}{2pt}},
-  line-style / solid-circles .code:n = \cs_set:Npn \_@@_divider: 
+  line-style / solid-circles .code:n = \cs_set:Npn \@@_divider: 
     {\@@_tile_pattern:nnn {\@@_solid_circle:}{1pt}{1pt}},
-  line-style / dense-solid-circles .code:n = \cs_set:Npn \_@@_divider:
+  line-style / dense-solid-circles .code:n = \cs_set:Npn \@@_divider:
     {\@@_tile_pattern:nnn {\@@_solid_circle:}{1pt}{0pt}},
-  line-style / loose-solid-circles .code:n = \cs_set:Npn \_@@_divider:
+  line-style / loose-solid-circles .code:n = \cs_set:Npn \@@_divider:
     {\@@_tile_pattern:nnn {\@@_solid_circle:}{2pt}{2pt}},
-  line-style / dotted .code:n = \cs_set:Npn \_@@_divider: 
+  line-style / dotted .code:n = \cs_set:Npn \@@_divider: 
     {\@@_line_pattern:nnnn {dotted}{\columnseprule}{1pt}{1pt}},
-  line-style / densely-dotted .code:n = \cs_set:Npn \_@@_divider:
+  line-style / densely-dotted .code:n = \cs_set:Npn \@@_divider:
     {\@@_line_pattern:nnnn {densely~dotted}{\columnseprule}{1pt}{0pt}},
-  line-style / loosely-dotted .code:n = \cs_set:Npn \_@@_divider:
+  line-style / loosely-dotted .code:n = \cs_set:Npn \@@_divider:
     {\@@_line_pattern:nnnn {loosely~dotted}{\columnseprule}{2pt}{2pt}},
-  line-style / dashed .code:n = \cs_set:Npn \_@@_divider:
+  line-style / dashed .code:n = \cs_set:Npn \@@_divider:
     {\@@_line_pattern:nnnn {dashed}{3pt}{1.5pt}{1.5pt}},
-  line-style / densely-dashed .code:n = \cs_set:Npn \_@@_divider:
+  line-style / densely-dashed .code:n = \cs_set:Npn \@@_divider:
     {\@@_line_pattern:nnnn {densely~dashed}{3pt}{1pt}{1pt}},
-  line-style / loosely-dashed .code:n = \cs_set:Npn \_@@_divider: 
+  line-style / loosely-dashed .code:n = \cs_set:Npn \@@_divider: 
     {\@@_line_pattern:nnnn {loosely~dashed}{3pt}{3pt}{3pt}},
   line-style / dash-dot .code:n =
-    \cs_set:Npn \_@@_divider: {\@@_pattern_line:n{dash~dot}},
+    \cs_set:Npn \@@_divider: {\@@_pattern_line:n{dash~dot}},
   line-style / densely-dash-dot .code:n =
-    \cs_set:Npn \_@@_divider: {\@@_pattern_line:n{densely~dash~dot}},
+    \cs_set:Npn \@@_divider: {\@@_pattern_line:n{densely~dash~dot}},
   line-style / loosely-dash-dot .code:n =
-    \cs_set:Npn \_@@_divider: {\@@_pattern_line:n{loosely~dash~dot}},
+    \cs_set:Npn \@@_divider: {\@@_pattern_line:n{loosely~dash~dot}},
   line-style / dash-dot-dot .code:n =
-    \cs_set:Npn \_@@_divider: {\@@_pattern_line:n{dash~dot~dot}},
+    \cs_set:Npn \@@_divider: {\@@_pattern_line:n{dash~dot~dot}},
   line-style / densely-dash-dot-dot .code:n =
-    \cs_set:Npn \_@@_divider: {\@@_pattern_line:n{densely~dash~dot~dot}},
+    \cs_set:Npn \@@_divider: {\@@_pattern_line:n{densely~dash~dot~dot}},
   line-style / loosely-dash-dot-dot .code:n =
-    \cs_set:Npn \_@@_divider: {\@@_pattern_line:n{loosely~dash~dot~dot}},
+    \cs_set:Npn \@@_divider: {\@@_pattern_line:n{loosely~dash~dot~dot}},
   color .code:n = {
     \tl_set:Nn \l_@@_color_name_tl {#1}
-    \_@@_set_rule_color:
+    \@@_set_rule_color:
   },
   color-model .code:n = {
     \tl_set:Nn \l_@@_color_model_tl {#1}
-    \_@@_set_rule_color:
+    \@@_set_rule_color:
   },
-  custom-line .code:n = \cs_set:Npn \_@@_divider:
+  custom-line .code:n = \cs_set:Npn \@@_divider:
     {\@@_tikz_picture:n {#1}},
-  custom-pattern .code:n = \cs_set:Npn \_@@_divider:
+  custom-pattern .code:n = \cs_set:Npn \@@_divider:
     {\@@_pattern:nnn #1},
-  custom-tile .code:n = \cs_set:Npn \_@@_divider:
+  custom-tile .code:n = \cs_set:Npn \@@_divider:
     {\@@_tile_pattern:nnn #1},
   width .choice:,
   width / ultra-thin  .code:n = \dim_set:Nn \columnseprule {0.1pt},
@@ -1171,4 +1225,10 @@ and the derived files           multicolrule.ins,
 %    \end{macrocode}
 %\end{macro}
 %
-%\Finale
+%\end{implementation}
+%
+% \PrintChanges
+%
+% \newpage
+%
+% \PrintIndex
