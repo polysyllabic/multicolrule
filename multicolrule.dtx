@@ -59,7 +59,7 @@ Copyright (C) 2018 by Karl Hagen <latex@polysyllabic.com>
  
 This file may be distributed and/or modified under the
 conditions of the LaTeX Project Public License (LPPL), either
-version 1.3 of this license or (at your option) any later
+version 1.3c of this license or (at your option) any later
 version. The latest version of this license is in the file:
     https://www.latex-project.org/lppl.txt
 
@@ -137,23 +137,18 @@ and the derived files           multicolrule.ins,
 %
 %\GetFileInfo{\jobname.sty}
 %
-%^^A \bool_lazy_and:nnTF and \tl_if_empty:NTF are appearing in the index even
-%^^A though they're explicitly excluded below. Why is that?
-%
-%\DoNotIndex{\begin,
-%   \bool_gset_true:N,
-%   \bool_if:NTF,
-%   \bool_lazy_and:nnTF,
+%\DoNotIndex{\AfterPackage,\begin,\bool_gset_true:N,\bool_if:NTF,
+%   \bool_lazy_and:nnT,\cs_gset_eq:NN,
 %   \bool_new:N,\box_ht:N,\cs_generate_variant:Nn,\cs_gset:Npn,\cs_new:Npn,
 %   \cs_new_nopar:Npn,\cs_set:Npn,\dim_compare_p:nNn,\dim_new:N,\dim_set:Nn,
 %   \end,\ExplSyntaxOff,\ExplSyntaxOn,\fill,\hbox:n,\hspace,\ht,
 %   \int_compare_p:nNn,\int_new:N,\int_set:Nn,\kern,\keys_define:nn,
 %   \keys_set:nn,\msg_error:nnn,\msg_info:nnn,\msg_new:nnn,\msg_warning:nn,
 %   \NewDocumentCommand,\node,\prg_replicate:nn,\ProcessKeysOptions,
-%   \ProvidesExplPackage,\RequirePackage,\rule,
-%   \tl_if_empty:NTF,\tl_new:N,
-%   \tl_set:Nn,\vbox:n,\vbox_to_ht:nn,\vfill,\vrule,\xpatchcmd,
-%   \cs_new_protected:Npn,\@ifpackageloaded,\@width}
+%   \ProvidesExplPackage,\RequirePackage,\rule,\normalcolor,
+%   \tl_if_empty:NT,\tl_if_empty:NTF,\tl_new:N,
+%   \tl_set:Nn,\vbox:n,\vbox_to_ht:nn,\vfill,\vrule,
+%   \cs_new_protected:Npn,\@ifpackageloaded,\@width,\xpatchcmd}
 %
 %\title{^^A
 %  \textsf{multicolrule} --- Decorative rules between columns\thanks{^^A
@@ -167,14 +162,17 @@ and the derived files           multicolrule.ins,
 %
 %\maketitle
 %
-%\changes{v0.1}{2018/12/15}{Initial public release}
+%\changes{v1.0}{2018/12/15}{Initial public release}
+%\changes{v1.1}{2018/12/19}{Work with \pkg{bidi}}
 %
 %\begin{abstract}
 % The \mcrule{} package lets you customize the appearance of the vertical rule
 % that appears between columns of multicolumn text. It is primarily intended to
 % work with the \pkg{multicol} package, hence its name, but it also supports
 % the twocolumn option and \cs{twocolumn} macro provided by the standard
-% classes (and related classes such as the KOMA-Script equivalents).
+% classes (and related classes such as the KOMA-Script equivalents), as well as
+% the \pkg{bidi} package (and through it, all RTL scripts loaded with
+% \pkg{polyglossia}).
 %\end{abstract}
 %
 %\tableofcontents
@@ -208,13 +206,12 @@ and the derived files           multicolrule.ins,
 % \end{multicols}
 %
 % \begin{multicols}{2}[\subsection{Bugs and Known Limitations}]
-% As\stydsc{line-style=dots} this is the first release of this package, there
-% are likely bugs that remain to be uncovered, as well as missing features and
-% inefficient methods that should be improved upon. The development code is
-% maintained on github (\url{https://github.com/polysyllabic/multicolrule}),
-% and you can file feature requests or bug reports there. Alternatively, you
-% can send an email to
-% \href{mailto://latex@polysyllabic.com}{latex@polysyllabic.com}. I welcome
+% There\stydsc{line-style=dots} are likely bugs that remain to be uncovered,
+% as well as missing features and inefficient methods that should be improved
+% upon. The development code is maintained on github
+% (\url{https://github.com/polysyllabic/multicolrule}), and you can file
+% feature requests or bug reports there. Alternatively, you can send an email
+% to \href{mailto://latex@polysyllabic.com}{latex@polysyllabic.com}. I welcome
 % contributions for additional styles, especially to provide more options when
 % running the package without \pkg{tikz}.
 %  
@@ -234,16 +231,18 @@ and the derived files           multicolrule.ins,
 % works, as the default rules show the same behavior. I may try to nail down
 % this issue in future version, but as it's an edge case that disappears when
 % you add page breaks or rewrite the text to alter how the columns are filled,
-% it hasn't seemed worth 
+% it hasn't seemed worth taking the time to fix at this point.
 % 
 % This package works by patching the output routines of either \pkg{multicol}
-% or the \LaTeX{} kernel, depending on the mode of operation. It therefore will
-% have no effect if you use a class or package that outputs column text via
-% alternate mechanisms. This includes \pkg{parcolumns}, and probably other
-% classes and packages designed to typeset parallel-column text as well, although
-% I have not done a survey to determine whether this is the case. If you would
-% like support for one of these, please send me an email or file a feature
-% request on github and I'll see what I can do.
+% or the \LaTeX{} kernel, depending on the mode of operation. If \pkg{bidi} is
+% loaded,\footnote{This \XeTeX{}-only package can be loaded indirectly by
+% \pkg{polyglossia} if you load a language with a RTL script} it will also
+% patch that. It will have no effect if you use a class or package that outputs
+% column text via alternate mechanisms. This includes \pkg{parcolumns}, and
+% probably other classes and packages designed to typeset parallel-column text
+% as well, although I have not done a survey to determine whether this is the
+% case. If you would like support for one of these, please send me an email or
+% file a feature request on github and I'll see what I can do.
 % 
 % \mcrule{} is written using expl3 syntax, and so requires a less-than-ancient
 % installation of \LaTeX. It uses the packages \pkg{l3keys2e}, \pkg{xparse},
@@ -255,11 +254,11 @@ and the derived files           multicolrule.ins,
 % \begin{multicols}{2}[\subsection{License}]
 % \SetMCRule{width=ultra-thick,line-style=dotted}
 % The\stydsc{\texttt{line-style=dotted, width=ultra-thick}} \mcrule{}
-% package is copyright 2018 by Karl Hagen. It may be distributed and/or modified
-% under the conditions of the \LaTeX{} Project Public License, either version 1.3
-% of this license or (at your option) any later version. The latest version of
-% this license is in \url{http://www.latex-project.org/lppl.txt} and version 1.3
-% or later is part of all distributions of \LaTeX{} version 2005/12/01 or later.
+% package is copyright 2018 by Karl Hagen. It may be distributed and/or
+% modified under the conditions of the \LaTeX{} Project Public License, either
+% version 1.3c of this license or (at your option) any later version. The
+% latest version of this license is in
+% \url{http://www.latex-project.org/lppl.txt}.
 %  
 % This work has the LPPL maintenance status `maintained.' The Current
 % Maintainer of this work is Karl Hagen.
@@ -309,7 +308,6 @@ and the derived files           multicolrule.ins,
 %
 % \begin{multicols}{2}[\section{The User Interface}]
 % \SetMCRule{width=2pt,line-style=circles}
-% \DescribeMacro{\SetMCRule}
 % The\stydsc{line-style=circles,\\width=2pt} \mcrule{} package has
 % just a single user command:
 %
@@ -622,7 +620,7 @@ and the derived files           multicolrule.ins,
 %\subsection{Preliminaries}
 %
 %    \begin{macrocode}
-\ProvidesExplPackage {multicolrule} {2018/12/18} {1.0}
+\ProvidesExplPackage {multicolrule} {2018/12/19} {1.1}
 {Decorative~vertical~rules~between~columns}
 %    \end{macrocode}
 %
@@ -631,6 +629,7 @@ and the derived files           multicolrule.ins,
 \RequirePackage{l3keys2e}
 \RequirePackage{xpatch}
 \RequirePackage{xcolor}
+\RequirePackage{scrlfile}
 %    \end{macrocode}
 %
 % Define the messages we use.
@@ -716,63 +715,112 @@ and the derived files           multicolrule.ins,
 %    \end{macrocode}
 %\end{function}
 %
-% Now that we know what mode we're going to run in, we patch the output routine
-% to substitute our custom rule for the vanilla one. Since \pkg{multicol}
-% doesn't fully support twocolumn mode, we patch one or the other, but not
-% both.
-% 
+% Now that we know what mode we're going to run in, we patch the output
+% routine(s) to substitute our custom rule for the vanilla one. Since
+% \pkg{multicol} doesn't fully support twocolumn mode, we patch one or the
+% other, but not both.
+%
+%\begin{function}{\@@_patch_mcol_output:N}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_patch_mcol_output:N #1
+{
+  \xpatchcmd{#1} {\vrule\@width\columnseprule} {\mcruledivider}
+  {\msg_info:nnn {multicolrule} {patch-success} {#1}}
+  {\msg_info:nnn {multicolrule} {patch-failure} {#1}}
+}
+%    \end{macrocode}
+%\end{function}
+%
+%\begin{function}{\@@_patch_twocol_output:N}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_patch_twocol_output:N #1
+{
+  \xpatchcmd{#1} {\normalcolor\vrule\@width\columnseprule}
+  {\columnseprulecolor\mcruledivider}
+  {\msg_info:nnn {multicolrule} {patch-success} {#1}}
+  {\msg_info:nnn {multicolrule} {patch-failure} {#1}}
+}
+%    \end{macrocode}
+%\end{function}
+%
 %    \begin{macrocode}
 \bool_if:NTF \g_@@_twocolumn_bool
 {
   \@ifpackageloaded{multicol}
-  {
-    \msg_warning:nn {multicolrule} {multicol-loaded}  
-  }
+  {\msg_warning:nn {multicolrule} {multicol-loaded}}{}
 %    \end{macrocode}
 % Provide the column-color macro from \pkg{multicol}.
 %    \begin{macrocode}
   \cs_gset:Npn \columnseprulecolor {\normalcolor}
   \cs_gset:Npn \@@_col_box: {\@outputbox}
+  \@@_patch_twocol_output:N \@outputdblcol
 %    \end{macrocode}
+%
 % Now patch the relevant code in |\@outputdblcol|, replacing the hard-coded
-% rule with a macro that we can overwrite
+% rule with a macro that we can overwrite.
+%
 %    \begin{macrocode}
-  \xpatchcmd{\@outputdblcol} {\normalcolor\vrule\@width\columnseprule}
-  {\columnseprulecolor\mcruledivider}
+  \@@_patch_twocol_output:N \@outputdblcol
+%    \end{macrocode}
+%
+% \pkg{bidi} has two output routines to patch, and it insists on being loaded
+% after \pkg{xcolor}, \pkg{tikz}, \emph{and} \pkg{multicol}, so it must always
+% be loaded after us. We use \cs{AfterPackage} from \pkg{scrlfile} to insert
+% the patch if \pkg{bidi} is loaded later on.
+%
+%    \begin{macrocode}
+  \AfterPackage!{bidi}
   {
-    \msg_info:nnn {multicolrule} {patch-success} {\@outputdblcol}
-  }
-  {
-    \msg_info:nnn {multicolrule} {patch-failure} {\@outputdblcol}
+    \@@_patch_twocol_output:N \RTL@outputdblcol
+    \@@_patch_twocol_output:N \LTR@outputdblcol
   }
 }
-{
 %    \end{macrocode}
 %
-% The patching for \pkg{multicol} is essentially the same as that for \LaTeX's
-% normal |twocolumn| mode, except we ensure that \pkg{multicol} is present and
-% we have two output routines to patch: one for LTR and the other for RTL
-% printing.
+% Now patch for \pkg{multicol}.
 %
 %    \begin{macrocode}
+{
   \RequirePackage{multicol}
   \cs_gset:Npn \@@_col_box: {\mult@rightbox}
-  % Patch the code in multicol that creates the vertical rule.
-  \xpatchcmd{\LR@column@boxes} {\vrule\@width\columnseprule} {\mcruledivider}
-  {\msg_info:nnn {multicolrule} {patch-success} {\LR@column@boxes}}
-  {\msg_info:nnn {multicolrule} {patch-failure} {\LR@column@boxes}}
-  \xpatchcmd{\RL@column@boxes} {\vrule\@width\columnseprule} {\mcruledivider}
-  {\msg_info:nnn {multicolrule} {patch-success} {\RL@column@boxes}}
-  {\msg_info:nnn {multicolrule} {patch-failure} {\RL@column@boxes}}
+  \@@_patch_mcol_output:N \LR@column@boxes
+  \@@_patch_mcol_output:N \RL@column@boxes
 %    \end{macrocode}
 %
-% Reissue \cs{LRmulticolcolumns} to update the actual code
-% in \cmd{\mc@align@columns}.
+% We need to reissue \cs{LRmulticolcolumns} to update the actual code in
+% \cmd{\mc@align@columns}.
 %
 %    \begin{macrocode}
-  \LRmulticolcolumns
+    \LRmulticolcolumns
+%    \end{macrocode}
+%
+% The \pkg{bidi} package supplies its own versions of most core
+% \pkg{multicol} functions, including the output boxes. Much of this is
+% unnecessary, as current versions of \pkg{multicol} support printing the
+% columns in right-to-left order, and the effect is to leave the original
+% \pkg{multicol} definitions loaded but unused. As a result, after these
+% changes, the \pkg{multicol} commands \cs{LRmulticolcolumns} and
+% \cs{RLmulticolcolumns} have no visible effect. But as \pkg{bidi} also
+% reworks the footnotes extensively, it's easier just to patch the equivalent
+% output routines rather than rewrite it properly.
+%
+%    \begin{macrocode}
+  \AfterPackage!{bidi}
+  {
+    \cs_gset_eq:NN \LTR@column@boxes \LR@column@boxes
+    \cs_gset_eq:NN \RTL@column@boxes \RL@column@boxes
+%    \end{macrocode}
+%
+% While we're at it, we also redefine \cs{LRmulticolcolumns} and
+% \cs{RLmulticolcolumns} so they work the way people expect them to.
+%
+%    \begin{macrocode}
+    \cs_gset_eq:NN \LRmulticolcolumns \LTRmulticolcolumns
+    \cs_gset_eq:NN \RLmulticolcolumns \RTLmulticolcolumns
+  }
 }
 %    \end{macrocode}
+% 
 %
 % \subsection{Creating the Rules}
 % Utility functions for different rule types

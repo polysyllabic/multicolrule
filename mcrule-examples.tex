@@ -1,8 +1,11 @@
+% !TeX program = xelatex
 \documentclass{article}
+\usepackage{fontspec}
 \usepackage[tikz]{multicolrule}
 \usepackage{lipsum}
 \usepackage{bbding}
 \usepackage{pgfornament}
+\usepackage{bidi}
 \setlength{\columnsep}{24pt}
 \setlength{\columnseprule}{.5pt}
 \begin{document}
@@ -82,7 +85,6 @@ for instructions on how to set them in your own documents.
   \lipsum[1]
 \end{multicols}
 
-
 \subsection*{Tikz Only}
 \begin{multicols}{2}[Circles]
   \SetMCRule{width=3pt,line-style=circles}
@@ -155,5 +157,22 @@ for instructions on how to set them in your own documents.
   \SetMCRule{repeat=4,repeat-distance=4pt,width=1pt,custom-line={\draw[line width=\columnseprule] (TOP) to [ornament=88] (BOT);}}
   \lipsum[1]
 \end{multicols}
+
+\subsection*{RTL Test}
+
+  \RLmulticolcolumns
+
+\begin{multicols}{2}[Reverse Columns Only]
+  \SetMCRule{custom-tile={+}{8pt}{8pt}}
+  \lipsum[1]
+\end{multicols}
+
+\begin{RTL}
+  \begin{multicols}{2}[Mode RTL Full]
+    \SetMCRule{custom-tile={+}{8pt}{8pt}}
+    \lipsum[1]
+  \end{multicols}
+\end{RTL}
+
 
 \end{document}
