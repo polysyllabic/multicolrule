@@ -164,6 +164,7 @@ for instructions on how to set them in your own documents.
 \end{multicols}
 
 \subsection*{Extended Rules}
+\setlength{\columnsep}{24pt}
 
 \begin{multicols}{2}[Solid -- extend bottom 16pt]
   \SetMCRule{line-style=solid,extend-bot=16pt}
@@ -180,6 +181,11 @@ for instructions on how to set them in your own documents.
   \lipsum[1]
 \end{multicols}
 
+\begin{multicols}{2}[Extend-Fill]
+  \SetMCRule{line-style=solid,extend-fill,extend-reserve=\baselineskip}
+  \lipsum[1-5]
+\end{multicols}
+Something
 
 \subsection*{RTL Test}
 
