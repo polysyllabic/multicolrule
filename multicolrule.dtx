@@ -143,15 +143,17 @@ and the derived files           multicolrule.ins,
 %\GetFileInfo{\jobname.sty}
 %
 %\DoNotIndex{\AfterPackage,\begin,\bool_gset_true:N,\bool_if:NTF,
-%   \bool_lazy_and:nnT,\cs_gset_eq:NN,
-%   \bool_new:N,\box_ht:N,\cs_generate_variant:Nn,\cs_gset:Npn,\cs_new:Npn,
+%   \bool_lazy_and:nnT,\cs_gset_eq:NN,\bool_if_p:n,\bool_lazy_and:nnTF,
+%   \bool_not_p:n,\bool_new:N,\box_ht:N,\box_dp:N,\box_move_down:nn,
+%   \cs_generate_variant:Nn,\cs_gset:Npn,\cs_new:Npn,
 %   \cs_new_nopar:Npn,\cs_set:Npn,\dim_compare_p:nNn,\dim_new:N,\dim_set:Nn,
+%   \dim_compare:nNnTF,\dim_eval:n,\dimen,
 %   \end,\ExplSyntaxOff,\ExplSyntaxOn,\fill,\hbox:n,\hspace,\ht,
 %   \int_compare_p:nNn,\int_new:N,\int_set:Nn,\kern,\keys_define:nn,
 %   \keys_set:nn,\msg_error:nnn,\msg_info:nnn,\msg_new:nnn,\msg_warning:nn,
 %   \NewDocumentCommand,\node,\prg_replicate:nn,\ProcessKeysOptions,
 %   \ProvidesExplPackage,\RequirePackage,\rule,\normalcolor,
-%   \tl_if_empty:NT,\tl_if_empty:NTF,\tl_new:N,
+%   \tl_if_empty:NT,\tl_if_empty:NTF,\tl_new:N,\tw@,
 %   \tl_set:Nn,\vbox:n,\vbox_to_ht:nn,\vfill,\vrule,
 %   \cs_new_protected:Npn,\@ifpackageloaded,\@width,\xpatchcmd}
 %
@@ -205,11 +207,17 @@ and the derived files           multicolrule.ins,
 % infrastructure for one line style, it was simple to extend the solution to a
 % more general case. I hope someone else will find the options here useful.
 %
-% Note---in case it isn't obvious yet---that this guide illustrates the basic
-% line styles that \mcrule{} makes available throught the document. The default
-% line-width is 0.4pt (thin), and the default color is \texttt{Maroon}. You can
-% find examples of rules created with all available options in the file
-% \file{mcrule-example.pdf}.
+% The basic line styles that \mcrule{} makes available are illustrated
+% throughout this guide. The default line-width used is 0.4pt (thin), and the
+% default color is \texttt{Maroon}. You can also find examples of rules created
+% with all available options in the file \file{mcrule-example.pdf}.
+%
+% \subsection*{New for Version 1.1}
+% Version 1.1 now supports drawing decorative rules if you have the \pkg{bidi}
+% package loaded, which can occur automatically if you set a right-to-left
+% language with \pkg{polyglossia}. It also provides a mechanism to extend or
+% shrink rules by fixed amounts, as well as to have the rule fill the available
+% space to the end of the text area (see section \ref{sec:extend}).
 %
 % \end{multicols}
 %
@@ -320,7 +328,7 @@ and the derived files           multicolrule.ins,
 %
 % \cs{SetMCRule} \marg{key-value}
 %
-% which takes one parameter containing a key-value list of all options you
+% \noindent It takes one parameter containing a key-value list of all options you
 % want to set. You can issue this command in the preamble or the document body.
 % Changes to the rule settings are local to the current group. For example, if
 % you call \cs{SetMCRule} inside a \env{multicols} environment, the rule
@@ -350,15 +358,23 @@ and the derived files           multicolrule.ins,
 % \kvdesc{color-model} & Set the color model of the rule (see sec.
 % \ref{sec:color})\\
 % \kvdesc{custom-line} & Set a custom \pkg{tikz} line for the rule 
-% (\emph{tikz only}; see \ref{sec:custom})\\
+% (\emph{tikz only}; see sec. \ref{sec:custom})\\
 % \kvdesc{custom-pattern} & Set a custom individual pattern for the rule (see
-% \ref{sec:custom})\\
+% sec. \ref{sec:custom})\\
 % \kvdesc{custom-tile} & Set a custom tiling pattern for the rule
-% (see \ref{sec:custom})\\
+% (see sec. \ref{sec:custom})\\
 % \kvdesc{double} & Draw two copies of the rule (see sec.
 % \ref{sec:repeats})\\
-% \kvdesc{line-style} & Select the type of rule printed (see sec.
-% \ref{sec:linestyles})\\
+% \kvdesc{extend-bot} & Set an extra amount to extend the rule at the bottom of
+% the column (see sec. \ref{sec:extend})\\
+% \kvdesc{extend-fill} & Extend rule to the bottom of the text area
+% (\emph{multicol} only; see sec. \ref{sec:extend})\\
+% \kvdesc{extend-reserve} & Space to reserve at bottom of text area when using
+% \kvdesc{extend-fill} (\emph{multicol} only; see sec, \ref{sec:extend})\\
+% \kvdesc{extend-top} & Set an extra amount to extend the rule at the top of 
+% the column (see sec. \ref{sec:extend})\\
+% \kvdesc{line-style} & Select the type of rule printed 
+% (default=\emph{default}; see sec. \ref{sec:linestyles})\\
 % \kvdesc{single} & Draw a single copy of the rule (\emph{default};
 % see sec. \ref{sec:repeats})\\
 % \kvdesc{repeat} & Set the number of times to draw the rule (see
@@ -376,20 +392,17 @@ and the derived files           multicolrule.ins,
 %   \label{sec:linestyles}]
 %  \SetMCRule{width=4pt,line-style=solid-circles}
 %  
-% You\stydsc{line-style=solid-circles,\\width=4pt} choose a style for the rule
-% with the \kvdesc{line-style} key. The default style is \kvdesc{solid}. In
-% addition to the predefined styles, there are also several ways to get
-% \mcrule{} to draw custom shapes in place of the column rule. The width of
-% most line styles depends on the setting of \cs{columnseprule}, which is the
-% default \LaTeX{} length that controls the width of the column rule
-% (see section \ref{sec:width}). 
+% You\stydsc{line-style= solid-circles,\\ width=4pt} choose a style for the rule
+% with the \kvdesc{line-style} key.  If the predefined styles are insufficient,
+% see section \ref{sec:custom} for different ways to customize it. The width of
+% most line styles depends on the setting of \cs{columnseprule}, the default
+% \LaTeX{} length that controls the width of the column rule (see section
+% \ref{sec:width}). 
 %  
-% Table \ref{table:linestyles} summarizes the available line styles.
-% Most of the basic shapes used to form the patterns come in three versions,
-% which differ only in how closely the pattern is spaced: normal, dense, and
-% loose. These settings parallel those found in \pkg{tikz}, and those
-% line styles whose names are identical to the line patterns in \pkg{tikz}
-% (apart from the substitution of `-' for spaces) produce the same effect.
+% Table \ref{table:linestyles} summarizes the available line styles. Most of
+% the basic patterns come in three versions, differing only in how closely the
+% pattern is spaced: normal, dense, and loose. These settings parallel those
+% found in \pkg{tikz}.
 % \end{multicols}
 %
 % \begin{longtable}{lp{3in}}
@@ -410,54 +423,73 @@ and the derived files           multicolrule.ins,
 %   \kvdesc{dash-dot-dot} & A dash followed by two square dots
 %     (\emph{tikz only})\\
 %   \kvdesc{dashed} & A series of dashed lines\\
+%   \kvdesc{default} & A solid rule drawn the same way as the default
+% \pkg{multicol} rule. Does not support extended rules.\\
 %   \kvdesc{dense-circles} & The same as \kvdesc{circles}
 %     but more closely spaced (\emph{tikz only})\\
 %   \kvdesc{dense-dots} & The same as \kvdesc{dots} but
 %     more closely spaced\\
-%   \kvdesc{dense-solid-circles} & The same as \kvdesc{solid-circles} but more closely spaced (\emph{tikz only})\\
-%   \kvdesc{densely-dash-dot} & The same as \kvdesc{dash-dot} but more closely spaced (\emph{tikz only})\\
-%   \kvdesc{densely-dash-dot-dot} & The same as \kvdesc{dash-dot-dot} but more closely spaced (\emph{tikz only})\\
-%   \kvdesc{densely-dashed} & The same as \kvdesc{dashed} but more closely spaced\\
-%   \kvdesc{densely-dotted} & The same as \kvdesc{dotted} but more closely spaced\\
-%   \kvdesc{dots}  & A series of dots drawn with the period (full-stop) of the current font\\
+%   \kvdesc{dense-solid-circles} & The same as \kvdesc{solid-circles} but more
+% closely spaced (\emph{tikz only})\\
+%   \kvdesc{densely-dash-dot} & The same as \kvdesc{dash-dot} but more closely
+% spaced (\emph{tikz only})\\
+%   \kvdesc{densely-dash-dot-dot} & The same as \kvdesc{dash-dot-dot} but more
+% closely spaced (\emph{tikz only})\\
+%   \kvdesc{densely-dashed} & The same as \kvdesc{dashed} but more closely
+% spaced\\
+%   \kvdesc{densely-dotted} & The same as \kvdesc{dotted} but more closely
+% spaced\\
+%   \kvdesc{dots}  & A series of dots drawn with the period (full-stop) of the
+% current font\\
 %   \kvdesc{dotted} & A series of square dots\\
 %   \kvdesc{loose-dots} & The same as \kvdesc{dots} but spaced further apart\\
-%   \kvdesc{loose-circles} & The same as \kvdesc{circles} but spaced further apart (\emph{tikz only})\\
-%   \kvdesc{loose-solid-circles} & The same as \kvdesc{solid-circles} but spaced further apart (\emph{tikz only})\\
-%   \kvdesc{loosely-dash-dot} & The same as \kvdesc{dash-dot} but spaced further apart (\emph{tikz only})\\
-%   \kvdesc{loosely-dash-dot-dot} & The same as \kvdesc{dash-dot-dot} but spaced further apart (\emph{tikz only})\\
-%   \kvdesc{loosely-dashed} & The same as \kvdesc{dashed} but spaced further apart\\
-%   \kvdesc{loosely-dotted} & The same as \kvdesc{dotted} but spaced further apart\\
-% \kvdesc{solid} & A solid line (\emph{default})\\
+%   \kvdesc{loose-circles} & The same as \kvdesc{circles} but spaced further
+% apart (\emph{tikz only})\\
+%   \kvdesc{loose-solid-circles} & The same as \kvdesc{solid-circles} but
+% spaced further apart (\emph{tikz only})\\
+%   \kvdesc{loosely-dash-dot} & The same as \kvdesc{dash-dot} but spaced
+% further apart (\emph{tikz only})\\
+%   \kvdesc{loosely-dash-dot-dot} & The same as \kvdesc{dash-dot-dot} but
+% spaced further apart (\emph{tikz only})\\
+%   \kvdesc{loosely-dashed} & The same as \kvdesc{dashed} but spaced further
+% apart\\
+%   \kvdesc{loosely-dotted} & The same as \kvdesc{dotted} but spaced further
+% apart\\
+% \kvdesc{solid} & A solid line, like \kvdesc{default}, but supports extending
+% rules\\
 % \kvdesc{solid-circles} & A series of filled circles (\emph{tikz only})\\
 % \bottomrule
 % \end{longtable}
 %
 % \begin{multicols}{2}[\subsubsection{Notes on the Styles}]
 % \SetMCRule{width=thin,line-style=solid} 
-% The\stydsc{line-style=solid} \kvdesc{solid}
-% line style is the default. In fact, if you make no calls to \cs{SetMCRule}
-% after loading \mcrule, the column divider will behave exactly as it does with
-% the ordinary \pkg{multicol} package. You can alter its width and color either
-% with the
-% \kvdesc{width} and \kvdesc{color} keys described in
-% sections \ref{sec:width} and \ref{sec:color}, respectively, or you can set the
-% width directly by changing the value of \cs{columnseprule} and renewing the
-% \cs{columnseprulecolor} macro. Like all line styles, the solid line can be
-% repeated as many times as you like (see section \ref{sec:repeats}).
-%  
-% The \kvdesc{dots} style and its variants are rendered with a period
-% (.) in the currently active font. This means that changing
-% \cs{columnseprule} will not change the size of these dots, although, as with
-% all rules, it will not appear at all if \cs{columnseprule} is set to 0pt.
+% The\stydsc{line-style=solid} \kvdesc{default} and \kvdesc{solid} line styles
+% are nearly the same, except that the \kvdesc{solid} line (as of version 1.1)
+% supports the rule-extension commands described in section \ref{sec:extend}.
+% This means that if you want a solid rule with altered top or bottom
+% extensions, you must explicitly set the line style to \kvdesc{solid}. If you
+% make no calls to \cs{SetMCRule} after loading \mcrule, the column divider
+% will continue to behave exactly as it does with the ordinary \pkg{multicol}
+% package.
 %
-% The \kvdesc{dotted} styles differ from \kvdesc{dots} in
-% that the former are squares with side lengths equal to \cs{columnseprule}.
-% This mirrors the behavior of the equivalently named dotted patterns in
-% \pkg{tikz}.
+% You can alter the rule's width and color either through \cs{SetMCRule} with
+% the \kvdesc{width} and \kvdesc{color} keys described in sections
+% \ref{sec:width} and \ref{sec:color}, respectively, or directly by changing
+% the value of \cs{columnseprule} and renewing the \cs{columnseprulecolor}
+% macro. All line styles, including \kvdesc{default}, can be repeated as many
+% times as you like (see section \ref{sec:repeats}).
+%  
+% The \kvdesc{dots} style and its variants are rendered with a period (.) in
+% the currently active font. This means that changing \cs{columnseprule} will
+% not change the size of these dots, although, as with all rules, it will not
+% appear at all if \cs{columnseprule} is set to 0pt. Custom tiles and patterns
+% also do not scale with \cs{columnseprule}.
+%
+% The \kvdesc{dotted} styles differ from \kvdesc{dots} in that the former are
+% squares with side lengths equal to \cs{columnseprule}. This mirrors the
+% behavior of the equivalently named dotted patterns in \pkg{tikz}.
 % \end{multicols}
 %
-% \clearpage
 % \subsubsection{Custom Patterns}\label{sec:custom}
 %
 % \begin{multicols}{2}[\noindent\texttt{custom-tile=} \marg{pattern} \marg{space above}
@@ -477,7 +509,9 @@ and the derived files           multicolrule.ins,
 %
 % The rule in this section uses the \cs{SparkleBold} symbol from
 % \pkg{bbding}. Notice that when you use the \kvdesc{custom-tile} parameter,
-% you do \emph{not} specify a separate \kvdesc{line-style}.
+% of any of the other custom key commands, you do \emph{not} specify a separate
+% \kvdesc{line-style}. If you try to provide both, the last style given in the
+% list will be the one that is kept.
 % \end{multicols}
 %
 % \begin{multicols}{2}[\noindent\texttt{custom-pattern=} \marg{pattern} \marg{shift
@@ -494,6 +528,7 @@ and the derived files           multicolrule.ins,
 % uses the \cs{HandRight} symbol from \pkg{bbding}.
 % \end{multicols}
 %
+% \clearpage
 % \begin{multicols}{2}[\noindent\texttt{custom-line=} \marg{draw command}]
 % \SetMCRule{width=1pt,custom-line={\draw[line width=\columnseprule] (TOP) to
 %   [ornament=88] (BOT);}}
@@ -554,7 +589,7 @@ and the derived files           multicolrule.ins,
 %
 % \begin{multicols}{2}[\subsection{Width}\label{sec:width}]
 % \SetMCRule{width=thick,line-style=dash-dot-dot}
-% You\stydsc{line-style=dash-dot-dot,\\width=thick} can set the width of the
+% You\stydsc{line-style= dash-dot-dot,\\ width=thick} can set the width of the
 % rule with the \kvdesc{width} key. Legal values are any explicit dimension or
 % dimension expression, as well as with names that parallel those used by
 % \pkg{tikz}, except that spaces in the key names are replaced with hyphens.
@@ -600,14 +635,50 @@ and the derived files           multicolrule.ins,
 %  
 % The keys \kvdesc{single}, \kvdesc{double}, and \kvdesc{triple} are shorthand
 % methods to set the number of repeats and the \kvdesc{repeat-distance} at the
-% same time. If use the key without a value \kvdesc{repeat-distance} is set to 
-% \cs{columnseprule}.
+% same time. If you use the key without a value \kvdesc{repeat-distance} is set
+% to \cs{columnseprule}.
 %
 % There are no checks made to ensure that repeated rules will fit in the
 % available space between columns, so you should be careful using these
 % commands, especially with thicker rules.
 % \end{multicols}
 %
+%\begin{multicols}{2}[\subsection{Extended Rules}\label{sec:extend}]
+% \SetMCRule{line-style=dashed,extend-top=-16pt,extend-bot=-16pt}
+%
+% You\stydsc{line-style=dashed, extend-top=-16pt, extend-bot=-16pt} can specify
+% an additional amount by which the top or bottom of the rule projects beyond
+% the column's natural length with the keys \kvdesc{extend-top} and
+% \kvdesc{extend-bot}, each of which can be set to a dimension expression.
+% Extending the top of the rule with a positive dimension will push the columns
+% down from any preceding material. A positive value for \kvdesc{extend-bot}
+% does the same in the other direction when a column ends in the middle of a
+% page, but the rule will extend into the the bottom margin if the column goes
+% to the end of the page, and so you probably only want to use this in very
+% limited situations where you need a special effect for one small
+% \env{multicol} environment. Negative values for both keys may be more 
+% generally useful, as they have the effect of shrinking the rule. This
+% behavior is illustrated with the rule for this section.
+%
+% The \kvdesc{extend-fill} key is a boolean option that, when set to true, will
+% extend the rule to occupy any space between the bottom of the columns and the
+% end of the text area. Providing the key with no value is equivalent to
+% |extend-fill=true|. This option has no effect unless the \pkg{multicol}
+% package is loaded.
+%
+% If you want text below the \env{multicols} environment when using
+% \kvdesc{extend-fill}, you can reserve space for it with
+% \kvdesc{extend-reserve}, which takes a dimension expression specifying the
+% vertical space to leave available after the rule. If the value is greater
+% than zero, the height of the extended line will be reduced by the reserved
+% amount plus the value of \cs{multicolsep}. In other words, you only have to
+% specify the actual space you need for the text itself, not the space that 
+% \pkg{multicol} adds automatically below the columns. Note that if the amount
+% you request for reserved space is less than the amount actually available at
+% the end of the page, the rule will not extend below the columns and you
+% probably will find this material spilling onto the next page anyway.
+% 
+%\end{multicols}
 %\end{documentation}
 %
 %\begin{implementation}
@@ -871,12 +942,7 @@ and the derived files           multicolrule.ins,
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{function}{\@@_column_total_height:,
-%  \@@_column_total_depth:,
-%  \@@_extend_column_top:,
-%  \@@_extend_column_bottom:,
-%  \@@_extend_reserve:}
-% \changes{v1.1}{2018/12/20}{Added to extend rules by specified lengths}
+%\begin{function}{\@@_column_total_height:,\@@_column_total_depth:}
 %
 % Get column height and depth with any explicit alterations.
 %
@@ -891,6 +957,9 @@ and the derived files           multicolrule.ins,
   \dim_eval:n {\@@_column_depth: + \@@_extend_column_bottom:}
 }
 %    \end{macrocode}
+%\end{function}
+%
+%\begin{function}{\@@_extend_column_top:}
 %
 % Currently, the extend amount for the top is just the 
 % |\l_@@_extend_top_dim| distance. In the future we may allow more complex
@@ -904,11 +973,14 @@ and the derived files           multicolrule.ins,
   \l_@@_extend_top_dim
 }
 %    \end{macrocode}
+%\end{function}
 %
-% The extend-fill option, which is only applicable with \pkg{multicol}, extends
-% the rule from the bottom of the column to the end of the text area, minus
-% whatever reserved space the user specifies. If there's less space available
-% than requested, we give everything we can.
+%\begin{function}{\@@_extend_column_bottom:}
+%
+% The |extend-fill| option, which is only applicable with \pkg{multicol},
+% extends the rule from the bottom of the column to the end of the text area,
+% minus whatever reserved space the user specifies. If there's less space
+% available than requested, we give everything we can.
 %
 %    \begin{macrocode}
 \cs_new:Npn \@@_extend_column_bottom:
@@ -925,8 +997,11 @@ and the derived files           multicolrule.ins,
   {\l_@@_extend_bot_dim}
 }
 %    \end{macrocode}
+%\end{function}
 %
-% The reserve space is the amount of user-provided space we want, but we also
+%\begin{function}{\@@_extend_reserve:}
+%
+% The reserved space is the amount of user-provided space we want, but we also
 % have to account for the space added with \cs{multicolsep}.
 %
 %    \begin{macrocode}
@@ -943,11 +1018,10 @@ and the derived files           multicolrule.ins,
 % This is the internal routine that contains the instructions to draw one copy
 % of rule between columns. The default is identical to the original definition
 % used by \pkg{multicol}. It will be reset each time the user calls
-% |\MCSetRule|.
+% \cs{MCSetRule}.
 %
 %    \begin{macrocode}
-\cs_new:Npn \@@_divider: {\@@_debug_log:n {default}
-  \vrule\@width\columnseprule}
+\cs_new:Npn \@@_divider: {\vrule\@width\columnseprule}
 %    \end{macrocode}
 %\end{function}
 %
@@ -976,28 +1050,6 @@ and the derived files           multicolrule.ins,
 %    \end{macrocode}
 %\end{function}
 %
-%    \begin{macrocode}
-\cs_new:Npn \@@_debug_log:n #1
-{
-  \tl_log:n {#1}
-  \dim_log:N \pagegoal
-  \dim_log:N \maxdimen
-  \dim_log:N \pagetotal
-  \dim_log:n {\pagegoal - \pagetotal}
-  \dim_log:N \page@free
-  \dim_log:N \dimen@
-  \dim_compare:nNnTF {\dimen@} = {\@@_column_height:}
-    {\tl_log:n {dimen@ = box~height}}
-    {\dim_log:n {\@@_column_height:}}
-  \dim_log:N \@colroom
-  \dim_log:n {\dimen\tw@}
-  \dim_compare:nNnTF {\dimen\tw@} = {\@@_column_depth:}
-    {\tl_log:n {dimen@ = box~depth}}
-    {\dim_log:n {\@@_column_depth:}}
-  \dim_log:n {\@@_column_total_height:}
-  \dim_log:n {\@@_column_total_depth:}
-}
-%    \end{macrocode}
 %\begin{function}{\@@_tile_pattern:nnn}
 %  \begin{syntax}
 %    |\__mcrule_tile_pattern:nnn| \Arg{pattern} \Arg{space above} \Arg{space below}
@@ -1009,7 +1061,6 @@ and the derived files           multicolrule.ins,
 %    \begin{macrocode}
 \cs_new_nopar:Npn \@@_tile_pattern:nnn #1#2#3
 {
-  \@@_debug_log:n {tile~#1}
   \box_move_down:nn {\@@_column_total_depth:}
   {
     \vbox_to_ht:nn {\@@_column_total_height:}
@@ -1037,7 +1088,6 @@ and the derived files           multicolrule.ins,
 %    \begin{macrocode}
 \cs_new:Npn \@@_line_pattern:nnnn #1#2#3#4
 {
-  \@@_debug_log:n {line~#1}
   \bool_if:NTF \g_@@_use_tikz_bool
   {
     \@@_pattern_line:n {#1}
@@ -1056,7 +1106,6 @@ and the derived files           multicolrule.ins,
 %    \begin{macrocode}
 \cs_new:Npn \@@_solid_line:
 {
-  \@@_debug_log:n {solid~line}
   \rule[-\@@_column_total_depth:]{\columnseprule}{\@@_column_total_height:}
 }
 %    \end{macrocode}
@@ -1087,7 +1136,6 @@ and the derived files           multicolrule.ins,
 %    \begin{macrocode}
 \cs_set:Npn \@@_tikz_picture:n #1
 {
-  \@@_debug_log:n {tikz~picture}
   \begin{tikzpicture}[x=1pt,y=1pt,inner~sep=0pt,outer~sep=0pt,
     baseline={([yshift=\@@_column_total_depth:]current~bounding~box.south)}]
   \node (TOP) at (0,\@@_column_total_height:) {};
@@ -1200,8 +1248,7 @@ and the derived files           multicolrule.ins,
   extend-reserve                   .dim_set:N  = \l_@@_extend_reserve_dim,
   line-style                       .choice:,
   line-style / default             .code:n = \cs_set:Npn \@@_divider: 
-    {\@@_debug_log:n {default}
-      \vrule\@width\columnseprule},
+    {\vrule\@width\columnseprule},
   line-style / solid               .code:n = \cs_set:Npn \@@_divider: 
     {\@@_solid_line:},
   line-style / dots                .code:n = \cs_set:Npn \@@_divider:
