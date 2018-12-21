@@ -1,7 +1,7 @@
 % !TeX program = xelatex
 \documentclass{article}
 \usepackage{fontspec}
-\usepackage[tikz]{multicolrule}[2018/12/20]
+\usepackage[tikz]{multicolrule}[2018/12/21]
 \usepackage{lipsum}
 \usepackage{bbding}
 \usepackage{pgfornament}
@@ -181,11 +181,11 @@ for instructions on how to set them in your own documents.
   \lipsum[1]
 \end{multicols}
 
-\begin{multicols}{2}[Extend-Fill]
+\begin{multicols}{2}[Extend-Fill with extend-reserve]
   \SetMCRule{line-style=solid,extend-fill,extend-reserve=\baselineskip}
   \lipsum[1-5]
 \end{multicols}
-Something
+And something at the end to show the reserved space
 
 \subsection*{RTL Test}
 
