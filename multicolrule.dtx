@@ -1041,9 +1041,9 @@ and the derived files           multicolrule.ins,
   {
     \vbox_to_ht:nn {\@@_column_total_height:}
     {
-      \vfill
-      \kern #2 \hbox:n{#1} \kern #3
-      \vfill
+      \tex_vfill:D
+      \tex_kern:D #2 \hbox:n{#1} \tex_kern:D #3
+      \tex_vfill:D
     }
   }
 }
@@ -1065,11 +1065,11 @@ and the derived files           multicolrule.ins,
   {
     \vbox_to_ht:nn {\@@_column_total_height:}
     {
-      \cleaders \vbox:n
+      \tex_cleaders:D \vbox:n
       {
-        \kern #2 \hbox:n{#1} \kern #3
+        \tex_kern:D #2 \hbox:n{#1} \tex_kern:D #3
       }
-    \vfill
+    \tex_vfill:D
     }
   }
 }
