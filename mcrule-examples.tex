@@ -153,13 +153,13 @@ for instructions on how to set them in your own documents.
 \end{multicols}
 
 \begin{multicols}{2}[Custom Line]
-  \SetMCRule{width=1pt,custom-line={\draw[line width=\columnseprule] (TOP) to [ornament=88] (BOT);}}
+  \SetMCRule{width=1pt,custom-line={\path (TOP) to [ornament=88] (BOT);}}
   \lipsum[1-2]
 \end{multicols}
 
 \setlength{\columnsep}{50pt}
 \begin{multicols}{2}[Custom Line (color gray, 4 repeats), just because we can]
-  \SetMCRule{color=gray,repeat=4,repeat-distance=4pt,width=1pt,custom-line={\draw[line width=\columnseprule] (TOP) to [ornament=88] (BOT);}}
+  \SetMCRule{color=gray,repeat=4,repeat-distance=4pt,width=1pt,custom-line={\path (TOP) to [ornament=88] (BOT);}}
   \lipsum[1-2]
 \end{multicols}
 
@@ -188,22 +188,6 @@ for instructions on how to set them in your own documents.
 \end{multicols}
 And something at the end to show the reserved space
 
-\subsection*{RTL Test}
-
-\RLmulticolcolumns
-
-\begin{multicols}{2}[Reverse Columns Only]
-  \SetMCRule{custom-tile={+}{8pt}{8pt}}
-  \lipsum[1-2]
-\end{multicols}
-
-\begin{RTL}
-  \begin{multicols}{2}[Mode RTL Full]
-    \SetMCRule{line-style=dashed}
-    \lipsum[1-2]
-  \end{multicols}
-\end{RTL}
-
 \subsection*{Patterns}
 
 \DeclareMCRulePattern{left-hand}{custom-tile={\HandLeft}{8pt}{8pt}}
@@ -217,13 +201,69 @@ And something at the end to show the reserved space
 \begin{multicols}{3}[Shrink and color first rule only]
   \raggedcolumns
   \SetMCRule{patterns=shrinking,pattern-for=1}
-  \lipsum
+  \lipsum[1-2]
 \end{multicols}
 
 \begin{multicols}{4}[Shrink and color second and third rules only]
   \raggedcolumns
   \SetMCRule{patterns=shrinking,pattern-after=1,pattern-for=2}
-  \lipsum
+  \lipsum[1-2]
 \end{multicols}
+
+\DeclareMCRulePattern{circlei}{width=3pt,line-style=loose-solid-circles,color=black}
+\DeclareMCRulePattern{circleii}{width=6pt,line-style=loose-solid-circles,color=black!75}
+\DeclareMCRulePattern{circleiii}{width=9pt,line-style=loose-solid-circles,color=black!50}
+\DeclareMCRulePattern{circleiv}{width=12pt,line-style=loose-solid-circles,color=black!25}
+\SetMCRule{patterns={circlei,circleii,circleiii,circleiv}}
+\begin{multicols}{4}[Growing and fading circles]
+  \raggedcolumns
+  \lipsum[1-2]
+\end{multicols}
+
+\begin{multicols}{4}[The same, pattern cycling across environment boundary]
+  \raggedcolumns
+  \lipsum[1-2]
+\end{multicols}
+
+
+\DeclareMCRulePattern{blue-double}{width=thick,line-style=solid,color=blue,double=3pt}
+\DeclareMCRulePattern{orange-triple}{width=thick,line-style=solid,color=orange,triple=3pt}
+\begin{multicols}{2}[Nested multicols environments]
+\SetMCRule{patterns={blue-double,blue-double,orange-triple}}
+
+\lipsum[1][1-5]
+
+\begin{multicols}{2}
+\lipsum[1][1-3]
+\end{multicols}  
+
+\lipsum[1][1-5]
+
+\lipsum[1][1-5]
+
+\begin{multicols}{2}
+\lipsum[1][1-3]
+\end{multicols}  
+
+\lipsum[1][1-5]
+
+\end{multicols}
+
+\subsection*{RTL Test}
+
+\RLmulticolcolumns
+\SetMCRule{patterns={}}
+\begin{multicols}{2}[Reverse Columns Only]
+  \SetMCRule{custom-tile={+}{8pt}{8pt}}
+  \lipsum[1]
+\end{multicols}
+
+\begin{RTL}
+  \begin{multicols}{2}[Mode RTL Full]
+    \SetMCRule{line-style=dashed}
+    \lipsum[1]
+  \end{multicols}
+\end{RTL}
+
 
 \end{document}
