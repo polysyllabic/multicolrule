@@ -170,7 +170,6 @@ and the derived files           multicolrule.ins,
 %\maketitle
 %
 %\changes{v1.0}{2018/12/15}{Initial public release}
-%\changes{v1.1}{2018/12/21}{Work with \pkg{bidi} and allow extending rules}
 %
 %\begin{abstract}
 % The \mcrule{} package lets you customize the appearance of the vertical rule
@@ -321,23 +320,20 @@ and the derived files           multicolrule.ins,
 % if you try to use them.
 % \end{multicols}
 %
-% \begin{multicols}{2}[\section{The User Interface}]
+% \section{The User Interface}
+% \begin{multicols}{2}
 % \SetMCRule{width=2pt,line-style=circles}
-% The\stydsc{line-style=circles,\\width=2pt} \mcrule{} package has
-% just a single user command:
-%
-% \cs{SetMCRule} \marg{key-value}
-%
-% \noindent It takes one parameter containing a key-value list of all options you
-% want to set. You can issue this command in the preamble or the document body.
-% Changes to the rule settings are local to the current group. For example, if
-% you call \cs{SetMCRule} inside a \env{multicols} environment, the rule
-% settings will revert to their previous values once the environment ends. Also
-% note that any changes made with \cs{SetMCRule} when multiple columns are
-% active will appear starting on the same page as your current location when you
-% issue the command, and will extend the height of the full column box. It is not
-% possible to have a rule change styles in the middle of a page unless you close
-% out one \env{multicols} environment and begin another.
+% The\stydsc{line-style=circles,\\width=2pt} main user command for \mcrule{} is
+% \cs{SetMCRule}. It takes one parameter containing a key-value list of all
+% options you want to set. You can issue this command in the preamble or the
+% document body. Changes to the rule settings are local to the current group.
+% For example, if you call \cs{SetMCRule} inside a \env{multicols} environment,
+% the rule settings will revert to their previous values once the environment
+% ends. Also note that any changes made with \cs{SetMCRule} when multiple
+% columns are active will appear starting on the same page as your current
+% location when you issue the command, and will extend the height of the full
+% column box. It is not possible to have a rule change styles in the middle of
+% a page unless you close out one \env{multicols} environment and begin another.
 %  
 % Table \ref{table:mcrulekeys} summarizes the keys available in \cs{SetMCRule}.
 % The functions of each is described in detail in the sections that follow.
@@ -491,9 +487,9 @@ and the derived files           multicolrule.ins,
 % \end{multicols}
 %
 % \subsubsection{Custom Patterns}\label{sec:custom}
-%
-% \begin{multicols}{2}[\noindent\texttt{custom-tile=} \marg{pattern} \marg{space above}
-%   \marg{space below}]
+% \noindent\texttt{custom-tile=} \marg{pattern} \marg{space above}
+%   \marg{space below}
+% \begin{multicols}{2}
 % \SetMCRule{custom-tile={\SparkleBold}{16pt}{16pt}}
 %
 % There\stydsc{custom-tile= \{\textbackslash SparkleBold\} \{16pt\}\{16pt\}}
@@ -528,7 +524,6 @@ and the derived files           multicolrule.ins,
 % uses the \cs{HandRight} symbol from \pkg{bbding}.
 % \end{multicols}
 %
-% \clearpage
 % \begin{multicols}{2}[\noindent\texttt{custom-line=} \marg{draw command}]
 % \SetMCRule{width=1pt,custom-line={\draw[line width=\columnseprule] (TOP) to
 %   [ornament=88] (BOT);}}
@@ -655,10 +650,11 @@ and the derived files           multicolrule.ins,
 % does the same in the other direction when a column ends in the middle of a
 % page, but the rule will extend into the the bottom margin if the column goes
 % to the end of the page, and so you probably only want to use this in very
-% limited situations where you need a special effect for one small
-% \env{multicol} environment. Negative values for both keys may be more 
-% generally useful, as they have the effect of shrinking the rule. This
-% behavior is illustrated with the rule for this section.
+% limited situations where you need a special effect for one column or a small
+% \env{multicol} environment. Overprinting and other bizarre effects can
+% result from extending the rule in the wrong place. Negative values for both
+% keys may be more generally useful, as they have the effect of shrinking the
+% rule. This behavior is illustrated with the rule for this section.
 %
 % The \kvdesc{extend-fill} key is a boolean option that, when set to true, will
 % extend the rule to occupy any space between the bottom of the columns and the
@@ -677,8 +673,85 @@ and the derived files           multicolrule.ins,
 % you request for reserved space is less than the amount actually available at
 % the end of the page, the rule will not extend below the columns and you
 % probably will find this material spilling onto the next page anyway.
-% 
 %\end{multicols}
+%
+%\subsection{Rule Patterns}
+% \begin{syntax}
+  % |\DeclareMCRulePattern| \marg{name} \marg{key-value list}
+  % \end{syntax}
+%\DeclareMCRulePattern{left-hand}{custom-tile={\HandLeft}{8pt}{8pt}}
+%\DeclareMCRulePattern{right-hand}{custom-tile={\HandRight}{8pt}{8pt}}
+%\begin{multicols}{3}
+% \SetMCRule{patterns={right-hand,left-hand}}
+%
+% A ``pattern'' refers to a bundle of settings used by \mcrule. You can declare
+% a pattern for a line style with the command \cs{DeclareMCRulePattern}. The
+% \meta{name} should consist of letters and hyphens only. The
+% \meta{key-value list} can contain all keys that are valid for \cs{SetMCRule}
+% with the exception of \kvdesc{patterns}. If you put something like
+% |patterns=foo| in the definition of a pattern, you won't get an error, but it
+% will be ignored.
+%
+% Once you have declared a pattern, you can use it as a value for the
+% \kvdesc{patterns} argument of \cs{SetMCRule}. This key can accept either a
+% single pattern or a comma-separated list of patterns. If you use a
+% comma-separated list, make sure you enclose it in braces.
+%
+% When a pattern is in effect, its settings are applied on top of whatever
+% the prior settings are. If you set the key to an empty list, any patterns
+% currently in effect will be canceled, and \mcrule{} will revert to the
+% previous settings.
+%
+% If the \kvdesc{patterns} key contains more than one pattern, \mcrule{} will
+% cycle through the list of patterns, using one pattern each time a rule is
+% drawn between columns. (Note, the patterns do not cycle within a single
+% column separator if you use the \kvdesc{repeat} key.) This cycle is global,
+% so if the number columns is not a multiple of the number of patterns and you
+% start a new \env{multicols} environment with the same patterns in effect, the
+% cycle will pick up where it left off. Every time you set new patternss,
+% however, the cycle begins anew.
+%
+% If you want to alter the rule only for certain column separators, you can use
+% the \kvdesc{pattern-after} and \kvdesc{pattern-for} keys, both of which
+% take integer values, in conjunction with \kvdesc{patterns}. 
+%
+% The \kvdesc{pattern-for} key means ``use the given pattern or patterns for
+% this many column separators only.'' Afterwards, the pattern will be disabled,
+% meaning that it won't be applied any more and only the settings applied
+% directly will be in effect until it is reset. A negative value to this key
+% means that the patterns will be repeated indefinitely. The default is $-1$.
+%
+% The \kvdesc{pattern-after} key means ``wait until after this many column
+% separators before starting to apply the pattern. The default is 0. If you use
+% it in conjunction with \kvdesc{pattern-for}, the count of modified column
+% separators begins after the skipped columns.
+%\end{multicols}
+%
+%\begin{verbatim}
+%\DeclareMCRulePattern {foo} {some keys\dots}
+%\begin{multicols}{4}
+%  \SetMCRule{patterns=foo, pattern-after=2, pattern-for=1}
+% Your text...
+%\end{multicols}
+%\end{verbatim}
+%
+%\begin{multicols}{3}
+% For example, suppose you have four-column text and want to alter the third
+% column separator on the first page of the environment only.\footnote{Remember
+% that you have one less column separator than you have columns.} You could
+% accomplish this task with the code above.
+%
+% Using predefined patterns adds processing overhead, since they must be
+% applied each time the rule is drawn. Therefore it is more efficient to avoid
+% patterns unless you need to actually change the line style from column to
+% column.
+%
+% Note that any settings you provide in the same command where you apply a 
+% \kvdesc{patterns} key do not alter definition of the pattern. If you do this,
+% you are altering the settings in effect before the pattern is applied.
+%
+%\end{multicols}
+%
 %\end{documentation}
 %
 %\begin{implementation}
@@ -696,8 +769,8 @@ and the derived files           multicolrule.ins,
 %\subsection{Preliminaries}
 %
 %    \begin{macrocode}
-\ProvidesExplPackage {multicolrule} {2018/12/21} {1.1}
-  {Decorative~vertical~rules~between~columns}
+\ProvidesExplPackage {multicolrule} {2018/12/31} {1.2}
+  {Decorative vertical rules between columns}
 %    \end{macrocode}
 %
 % We always need these packages.
@@ -712,11 +785,14 @@ and the derived files           multicolrule.ins,
 %    \begin{macrocode}
 \msg_new:nnn {multicolrule} {patch-success} {Patched~#1.}
 \msg_new:nnn {multicolrule} {patch-failure} {Error~patching~#1.}
-\msg_new:nnn {multicolrule} {tikz-required}
+\msg_new:nnnn {multicolrule} {tikz-required} {Tikz~required}
 {The~'#1'~setting~requires~tikz~to~work.~Either~load~tikz~before~you~load~
   multicolrule~or~use~multicolrule's~'tikz'~package~option.}
-\msg_new:nnn {multicolrule} {multicol-loaded} {You~are~using~the~'twocolumn'~
-  option~with~multicol~already~loaded.~You~will~likely~run~into~problems.}
+\msg_new:nnnn {multicolrule} {multicol-loaded} {Multicol~loaded} {You~are~
+  using~the~'twocolumn'~option~with~multicol~already~loaded.~You~will~likely~
+  run~into~problems.}
+\msg_new:nnnn {multicolrule} {pattern-undefined} {Pattern~undefined}
+  {The~multicolrule~pattern~'#1'~has~not~been~defined.}
 %    \end{macrocode}
 %
 %\begin{variable}{\g_@@_twocolumn_bool,\g_@@_use_tikz_bool}
@@ -742,6 +818,7 @@ and the derived files           multicolrule.ins,
 %  \l_@@_extend_reserve_dim}
 % Variables to control the distance to extend the rule above and below the
 % natural column height.
+%\changes{v1.1}{2018/12/21}{New variables}
 %    \begin{macrocode}
 \dim_new:N  \l_@@_extend_top_dim
 \dim_new:N  \l_@@_extend_bot_dim
@@ -756,6 +833,20 @@ and the derived files           multicolrule.ins,
 %    \begin{macrocode}
 \tl_new:N \l_@@_color_name_tl
 \tl_new:N \l_@@_color_model_tl
+%    \end{macrocode}
+%\end{variable}
+%
+%\begin{variable}{\g_@@_patterns_prop, \g_@@_pattern_count_int,
+% \g_@@_pattern_for_int, \g_@@_pattern_after_int,
+% \l_@@_pattern_list_seq}
+% Variables to support defined patterns.
+%\changes{v1.2}{2018/12/31}{New variables}
+%    \begin{macrocode}
+\prop_new:N \g_@@_patterns_prop
+\int_new:N  \g_@@_pattern_count_int
+\int_new:N  \g_@@_pattern_for_int
+\int_new:N  \g_@@_pattern_after_int
+\seq_new:N  \l_@@_pattern_list_seq
 %    \end{macrocode}
 %\end{variable}
 %
@@ -797,13 +888,18 @@ and the derived files           multicolrule.ins,
 % Now that we know what mode we're going to run in, we patch the output
 % routine(s) to substitute our custom rule for the vanilla one. Since
 % \pkg{multicol} doesn't fully support twocolumn mode, we patch one or the
-% other, but not both.
+% other, but not both. As of version 1.2, we make \cs{columnseprulecolor}
+% part of \cs{mcruledivider} so that we can set the color as part of a
+% style pattern.
 %
 %\begin{function}{\@@_patch_mcol_output:N}
+%\changes{v1.2}{2018/12/31}{Move \cs{columnseprulecolor} inside
+  %   \cs{mcruledivider}}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_patch_mcol_output:N #1
 {
-  \xpatchcmd{#1} {\vrule\@width\columnseprule} {\mcruledivider}
+  \xpatchcmd{#1} {\columnseprulecolor\vrule\@width\columnseprule}
+  {\mcruledivider}
   {\msg_info:nnn {multicolrule} {patch-success} {#1}}
   {\msg_info:nnn {multicolrule} {patch-failure} {#1}}
 }
@@ -811,11 +907,13 @@ and the derived files           multicolrule.ins,
 %\end{function}
 %
 %\begin{function}{\@@_patch_twocol_output:N}
+%\changes{v1.2}{2018/12/31}{Move \cs{columnseprulecolor} inside
+%   \cs{mcruledivider}}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_patch_twocol_output:N #1
 {
   \xpatchcmd{#1} {\normalcolor\vrule\@width\columnseprule}
-  {\columnseprulecolor\mcruledivider}
+  {\mcruledivider}
   {\msg_info:nnn {multicolrule} {patch-success} {#1}}
   {\msg_info:nnn {multicolrule} {patch-failure} {#1}}
 }
@@ -847,6 +945,7 @@ and the derived files           multicolrule.ins,
 % after \pkg{xcolor}, \pkg{tikz}, \emph{and} \pkg{multicol}, so it must always
 % be loaded after us. We use \cs{AfterPackage} from \pkg{scrlfile} to insert
 % the patch if \pkg{bidi} is loaded later on.
+%\changes{v1.1}{2018/12/21}{Support for bidi package}
 %
 %    \begin{macrocode}
   \AfterPackage!{bidi}
@@ -916,23 +1015,70 @@ and the derived files           multicolrule.ins,
 %
 %\begin{macro}{\mcruledivider}
 %
-% This is the function directly called by the patched output routines. It's
-% given a \LaTeX2 name so the user can redefine it if necessary. Its main
+% This is the function directly called by the patched output routines. It
+% has a \LaTeX2 name so the user can redefine it if necessary. Its main
 % function is to call the internal function \cs{_@@_divider:}, which contains
 % the actual rule-typesetting instructions, the number of times specified in
-% \cs{l_@@_repeat_int}. We only call \cs{_@@_divider:} if \cs{columnseprule}
-% $>0$, so that all line styles can be turned off by setting it to 0, just as
-% is the case with the vanilla rules.
+% \cs{l_@@_repeat_int}.  \pkg{multicol} puts the rule in a group
+% in order to keep the color contained, which means that any local changes
+% here will be lost at the end of the rule. For this reason, we must set the
+% pattern, if any, here in order to support having different line styles
+% between different columns.
 %
+%\changes{v1.2}{2018/12/31}{Add pattern support}
 %    \begin{macrocode}
-\cs_new:Npn \mcruledivider
+\cs_new_protected:Npn \mcruledivider
 {
+%    \end{macrocode}
+% If the |pattern-after| counter is set, wait that many iterations of the rule
+% before we apply the patterns.
+%    \begin{macrocode}
+  \int_compare:nNnTF {\g_@@_pattern_after_int} > {\c_zero_int}
+  {
+    \int_gdecr:N \g_@@_pattern_after_int
+  }
+  {
+%    \end{macrocode}
+% Don't change if the pattern is empty or the |pattern-for| counter has
+% expired. The way the logic works here, negative values of |pattern-for|
+% result in an indefinite number of repeats.
+%    \begin{macrocode}
+    \bool_lazy_and:nnT
+    {\int_compare_p:nNn {\seq_count:N \l_@@_pattern_list_seq} > {\c_zero_int}}
+    {! \int_compare_p:nNn {\g_@@_pattern_for_int} = {\c_zero_int}}
+    {
+      \int_gincr:N \g_@@_pattern_count_int
+      \int_compare:nNnT {\g_@@_pattern_count_int} >
+       {\seq_count:N \l_@@_pattern_list_seq}
+      {
+        \int_gset:Nn \g_@@_pattern_count_int {\c_one_int}
+      }
+      \tl_set:Nx \l_tmpa_tl {\seq_item:Nn \l_@@_pattern_list_seq {\g_@@_pattern_count_int} }
+      \tl_if_blank:VF \l_tmpa_tl
+      {
+        \@@_set_pattern:V \l_tmpa_tl
+      }
+      \int_compare:nNnT {\g_@@_pattern_for_int} > {\c_zero_int}
+      {
+        \int_gdecr:N \g_@@_pattern_for_int
+      }
+    }
+  }
+%    \end{macrocode}
+% Now that the pattern has been changed we can set the color.
+%    \begin{macrocode}
+  \columnseprulecolor
+%    \end{macrocode}
+% We only call \cs{@@_divider:} if \cs{columnseprule} $>0$, so that all
+% line styles can be turned off by setting it to 0, just as is the case with
+% the vanilla rules.
+%    \begin{macrocode}
   \bool_lazy_and:nnT
-  {\dim_compare_p:nNn {\columnseprule} > {0pt}}
-  {\int_compare_p:nNn {\l_@@_repeat_int} > {0}}
+  {\dim_compare_p:nNn {\columnseprule} > {\c_zero_dim}}
+  {\int_compare_p:nNn {\l_@@_repeat_int} > {\c_zero_int}}
   {
     \@@_divider:
-    \prg_replicate:nn {\l_@@_repeat_int - 1}
+    \prg_replicate:nn {\l_@@_repeat_int - \c_one_int}
     {
       \hspace{\l_@@_repeat_distance_dim}
       \@@_divider:
@@ -945,6 +1091,7 @@ and the derived files           multicolrule.ins,
 %\begin{function}{\@@_column_total_height:,\@@_column_total_depth:}
 %
 % Get column height and depth with any explicit alterations.
+%\changes{v1.1}{2018/12/21}{New functions}
 %
 %    \begin{macrocode}
 \cs_new:Npn \@@_column_total_height:
@@ -966,6 +1113,7 @@ and the derived files           multicolrule.ins,
 % criteria, such as by odd or even page, or on a particular page. Although
 % these might theoretically be useful, I'm not going to implement them until
 % someone comes along with a use-case for it.
+%\changes{v1.1}{2018/12/21}{New function}
 %
 %    \begin{macrocode}
 \cs_new:Npn \@@_extend_column_top:
@@ -981,6 +1129,8 @@ and the derived files           multicolrule.ins,
 % extends the rule from the bottom of the column to the end of the text area,
 % minus whatever reserved space the user specifies. If there's less space
 % available than requested, we give everything we can.
+%\changes{v1.1}{2018/12/21}{New function}
+%\changes{v1.2}{2018/12/31}{Use predefined constants}
 %
 %    \begin{macrocode}
 \cs_new:Npn \@@_extend_column_bottom:
@@ -990,9 +1140,9 @@ and the derived files           multicolrule.ins,
   {\bool_not_p:n {\g_@@_twocolumn_bool}}
   {
     \dim_compare:nNnTF 
-    {\@colroom - \@@_column_height: - \@@_extend_reserve:} > {0pt}
+    {\@colroom - \@@_column_height: - \@@_extend_reserve:} > {\c_zero_dim}
     {\@colroom - \@@_column_height: - \@@_extend_reserve:}
-    {0pt}
+    {\c_zero_dim}
   }
   {\l_@@_extend_bot_dim}
 }
@@ -1003,13 +1153,15 @@ and the derived files           multicolrule.ins,
 %
 % The reserved space is the amount of user-provided space we want, but we also
 % have to account for the space added with \cs{multicolsep}.
+%\changes{v1.1}{2018/12/21}{New function}
+%\changes{v1.2}{2018/12/31}{Use predefined constants}
 %
 %    \begin{macrocode}
 \cs_new:Npn \@@_extend_reserve:
 {
-  \dim_compare:nNnTF {\l_@@_extend_reserve_dim} > {0pt}
+  \dim_compare:nNnTF {\l_@@_extend_reserve_dim} > {\c_zero_dim}
   {\dim_eval:n {\l_@@_extend_reserve_dim + \multicolsep}}
-  {0pt}
+  {\c_zero_dim}
 }
 %    \end{macrocode}
 %\end{function}
@@ -1018,7 +1170,7 @@ and the derived files           multicolrule.ins,
 % This is the internal routine that contains the instructions to draw one copy
 % of rule between columns. The default is identical to the original definition
 % used by \pkg{multicol}. It will be reset each time the user calls
-% \cs{MCSetRule}.
+% \cs{MCSetRule} to specify a new line style.
 %
 %    \begin{macrocode}
 \cs_new:Npn \@@_divider: {\vrule\@width\columnseprule}
@@ -1033,6 +1185,7 @@ and the derived files           multicolrule.ins,
 % box that is the height of the current column. The pattern must be
 % something that can go in a horizontal box. The spaces above and below
 % must be fixed dimensions. 
+%\changes{v1.1a}{2018/12/24}{Use ...:D commands for \TeX{} primitives}
 % 
 %    \begin{macrocode}
 \cs_new_nopar:Npn \@@_pattern:nnn #1#2#3
@@ -1058,6 +1211,7 @@ and the derived files           multicolrule.ins,
 % that is the height of the current column. The pattern must be something
 % that can go in a horizontal box. The spaces above and below must be fixed
 % dimensions. 
+%\changes{v1.1a}{2018/12/24}{Use ...:D commands for \TeX{} primitives}
 %    \begin{macrocode}
 \cs_new_nopar:Npn \@@_tile_pattern:nnn #1#2#3
 {
@@ -1153,7 +1307,6 @@ and the derived files           multicolrule.ins,
 % For the \pkg{tikz} versions of the predefined lines, we just draw
 % a line the length of the column box. \meta{tikz pattern} should 
 % contain the name of a line style that \pkg{tikz} recognizes.
-%
 %    \begin{macrocode}
 \cs_set:Npn \@@_pattern_line:n #1
 {
@@ -1234,9 +1387,56 @@ and the derived files           multicolrule.ins,
 %    \end{macrocode}
 %\end{function}
 %
+% \subsection{Patterns}
+%
+%\begin{function}{\@@_set_pattern_list:n}
+%  
+% Sets a comma-separated list of patternss as a sequence for later use. The
+% global counter that indicates where we are in the list is also reset here, so
+% setting a list of patterns always means that the next rule will use the first
+% pattern in the list.
+% 
+%\changes{v1.2}{2018/12/31}{New function}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_set_pattern_list:n #1
+{
+  \seq_set_split:Nnn \l_@@_pattern_list_seq {,} {#1}
+  \int_gzero:N \g_@@_pattern_count_int
+  \int_gzero:N \g_@@_pattern_after_int
+  \int_gset:Nn \g_@@_pattern_for_int {-1}
+}
+%    \end{macrocode}
+%\end{function}
+%
+%\begin{function}{\@@_set_pattern:n}
+%  
+% Set the keys an individual pattern. To avoid potential recursion and loops,
+% we filter out the key `pattern' when it appears in a pattern definition.
+% 
+%\changes{v1.2}{2018/12/31}{New function}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_set_pattern:n #1
+{
+  \prop_get:NnNTF \g_@@_patterns_prop {#1} \l_tmpa_tl
+  {
+    \keys_set_filter:nnV {mcrule} {patterns} \l_tmpa_tl
+  }
+  {
+    \msg_error:nnn {multicolrule} {pattern-undefined} {#1}
+  }
+  \tl_set:Nn \l_tmpa_tl {\prop_item:Nn \g_@@_patterns_prop {#1}}
+}
+\cs_generate_variant:Nn \@@_set_pattern:n {V}
+%    \end{macrocode}
+%\end{function}
+%
 % \subsection{Key-Values}
 % Set up all the key definitions. For the line styles, this involves
 % resetting \cs{_@@_divider:} to an appropriate value.
+%\changes{v1.1}{2018/12/21}{Added extend-top, extend-bot, extend-fill, and
+%   extend-reserve keys}
+%\changes{v1.2}{2018/12/31}{Added patterns, pattern-after, and pattern-for
+%   keys}
 %
 %    \begin{macrocode}
 \keys_define:nn {mcrule}
@@ -1315,35 +1515,39 @@ and the derived files           multicolrule.ins,
   width / thick       .code:n = \dim_set:Nn \columnseprule {0.8pt},
   width / very-thick  .code:n = \dim_set:Nn \columnseprule {1.2pt},
   width / ultra-thick .code:n = \dim_set:Nn \columnseprule {1.6pt},
-  width / unknown     .code:n = {\dim_set:Nn \columnseprule {#1}},
-  repeat              .int_set:N = \l_@@_repeat_int,
-  repeat-distance     .dim_set:N = \l_@@_repeat_distance_dim,
-  single              .meta:n = {
+  width / unknown     .code:n = \dim_set:Nn \columnseprule {#1},
+  repeat              .int_set:N   = \l_@@_repeat_int,
+  repeat-distance     .dim_set:N   = \l_@@_repeat_distance_dim,
+  single              .meta:n      = {
     repeat = 1,
     repeat-distance = #1
   },
-  single              .default:n = \columnseprule,
-  double              .meta:n = {
+  single              .default:n   = \columnseprule,
+  double              .meta:n      = {
     repeat = 2,
     repeat-distance = #1
   },
-  double              .default:n = \columnseprule,
-  triple              .meta:n = {
+  double              .default:n   = \columnseprule,
+  triple              .meta:n      = {
     repeat = 3,
     repeat-distance = #1
   },
-  triple              .default:n = \columnseprule,
+  triple              .default:n   = \columnseprule,
+  patterns            .code:n      = \@@_set_pattern_list:n {#1},
+  patterns            .groups:n    = {patterns},
+  pattern-after       .int_gset:N  = \g_@@_pattern_after_int,
+  pattern-for         .int_gset:N  = \g_@@_pattern_for_int,
 }
 %    \end{macrocode}
 %
 % \subsection{User Interface}
-% With only one command, this section is short. All we do is set whatever keys
-% the user passes. All the real work is done in the definitions above.
 %
 %\begin{macro}{\SetMCRule}
-%\begin{syntax}
-%  |\SetMCRule| \marg{key-value list}
-%\end{syntax}
+% Set all keys for \mcrule{}
+% \begin{syntax}
+% |\SetMCRule| \marg{key-value list}
+% \end{syntax}
+% All we do here is pass the argument to expl3's key-setting routine.
 %    \begin{macrocode}
 \NewDocumentCommand{\SetMCRule}{m}
 {
@@ -1352,6 +1556,21 @@ and the derived files           multicolrule.ins,
 %    \end{macrocode}
 %\end{macro}
 %
+%\begin{macro}{\DeclareMCRulePattern}
+% Declare a new style pattern. 
+% \begin{syntax}
+% |\DeclareMCRule| \marg{name} \marg{key-value list}
+% \end{syntax}
+% If a pattern of that name exists, it will be overwritten silently.
+%    \begin{macrocode}
+\NewDocumentCommand{\DeclareMCRulePattern}{m m}
+{
+  \prop_gput:Nnn \g_@@_patterns_prop {#1} {#2}
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%</package>
 %\end{implementation}
 %
 % \PrintChanges

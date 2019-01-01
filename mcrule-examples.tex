@@ -1,7 +1,8 @@
 % !TeX program = xelatex
 \documentclass{article}
+\usepackage[left=1in,right=1in,top=1in,bottom=1in]{geometry}
 \usepackage{fontspec}
-\usepackage[tikz]{multicolrule}[2018/12/21]
+\usepackage[tikz]{multicolrule}[2018/12/31]
 \usepackage{lipsum}
 \usepackage{bbding}
 \usepackage{pgfornament}
@@ -153,16 +154,16 @@ for instructions on how to set them in your own documents.
 
 \begin{multicols}{2}[Custom Line]
   \SetMCRule{width=1pt,custom-line={\draw[line width=\columnseprule] (TOP) to [ornament=88] (BOT);}}
-  \lipsum[1]
+  \lipsum[1-2]
 \end{multicols}
 
 \setlength{\columnsep}{50pt}
-
-\begin{multicols}{2}[Custom Line (+ 4 repeats), just because we can]
-  \SetMCRule{repeat=4,repeat-distance=4pt,width=1pt,custom-line={\draw[line width=\columnseprule] (TOP) to [ornament=88] (BOT);}}
-  \lipsum[1]
+\begin{multicols}{2}[Custom Line (color gray, 4 repeats), just because we can]
+  \SetMCRule{color=gray,repeat=4,repeat-distance=4pt,width=1pt,custom-line={\draw[line width=\columnseprule] (TOP) to [ornament=88] (BOT);}}
+  \lipsum[1-2]
 \end{multicols}
 
+\newpage
 \subsection*{Extended Rules}
 \setlength{\columnsep}{24pt}
 
@@ -189,19 +190,40 @@ And something at the end to show the reserved space
 
 \subsection*{RTL Test}
 
-  \RLmulticolcolumns
+\RLmulticolcolumns
 
 \begin{multicols}{2}[Reverse Columns Only]
   \SetMCRule{custom-tile={+}{8pt}{8pt}}
-  \lipsum[1]
+  \lipsum[1-2]
 \end{multicols}
 
 \begin{RTL}
   \begin{multicols}{2}[Mode RTL Full]
     \SetMCRule{line-style=dashed}
-    \lipsum[1]
+    \lipsum[1-2]
   \end{multicols}
 \end{RTL}
 
+\subsection*{Patterns}
+
+\DeclareMCRulePattern{left-hand}{custom-tile={\HandLeft}{8pt}{8pt}}
+\DeclareMCRulePattern{right-hand}{custom-tile={\HandRight}{8pt}{8pt}}
+\DeclareMCRulePattern{shrinking}{line-style=solid,color=blue,extend-top=-16pt}
+\begin{multicols}{3}[Alternating Patterns]
+  \SetMCRule{patterns={right-hand,left-hand}}
+  \lipsum[1-3]
+\end{multicols}
+
+\begin{multicols}{3}[Shrink and color first rule only]
+  \raggedcolumns
+  \SetMCRule{patterns=shrinking,pattern-for=1}
+  \lipsum
+\end{multicols}
+
+\begin{multicols}{4}[Shrink and color second and third rules only]
+  \raggedcolumns
+  \SetMCRule{patterns=shrinking,pattern-after=1,pattern-for=2}
+  \lipsum
+\end{multicols}
 
 \end{document}
