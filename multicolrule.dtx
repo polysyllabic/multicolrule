@@ -1,5 +1,4 @@
 % \iffalse meta-comment
-% !TEX program  = pdfLaTeX
 %<*internal>
 \iffalse
 %</internal>
@@ -31,10 +30,7 @@ and to get the change list, you must issue
 
 `makeindex -s gglo.ist -o multicolrule.gls multicolrule.glo`.
 
-This package requires LaTeX3 support to run, and compiling the
-documentation requires a variety of other packages, all of which
-are available on CTAN and any modern installation (TeX Live,
-MiKTeX, etc.).
+This package requires expl3 and xparse.
 %</readme>
 %<*internal>
 \fi
@@ -58,7 +54,7 @@ See http://www.latex-project.org/lppl.txt
 
 \endpreamble
 \postamble
-Copyright (C) 2018 by Karl Hagen <latex@polysyllabic.com>
+Copyright (C) 2018-2019 by Karl Hagen <latex@polysyllabic.com>
  
 This file may be distributed and/or modified under the
 conditions of the LaTeX Project Public License (LPPL), either
@@ -110,6 +106,7 @@ and the derived files           multicolrule.ins,
 \usepackage{microtype}
 \usepackage[tikz]{multicolrule}
 \usepackage{longtable}
+\usepackage{ragged2e}
 \usepackage{scrlayer-scrpage}
 \usepackage{scrlayer-notecolumn}
 \usepackage{bbding}
@@ -118,17 +115,18 @@ and the derived files           multicolrule.ins,
 \automark[subsection]{section}
 \DeclareNewNoteColumn[
   reversemarginpar,
-  font=\color{Navy}\footnotesize\sffamily
+  font=\color{Navy}\footnotesize\ttfamily
 ]{illustration}
 \ProvideDocumentCommand\opt{m}{\texttt{#1}}
 \NewDocumentCommand{\stydsc}{m}{^^A
   \makenote*[illustration]{^^A
     \hspace*{32pt}\parbox{\marginparwidth-32pt}{^^A
-      \raggedright\texttt{#1}}^^A
+      \RaggedRight#1}^^A
   }^^A
 }
 \NewDocumentCommand{\mcrule}{}{\textcolor{Maroon}{multicolrule}}
 \NewDocumentCommand{\kvdesc}{m}{\textcolor{Navy}{\texttt{#1}}}
+\setlength{\parindent}{16pt}
 \setlength{\columnsep}{24pt}
 \SetMCRule{width=thin,color=Maroon,line-style=dots}
 \EnableCrossrefs         
@@ -169,7 +167,11 @@ and the derived files           multicolrule.ins,
 %
 %\maketitle
 %
-%\changes{v1.0}{2018/12/15}{Initial public release}
+% \changes{v1.0}{2018/12/15}{Initial public release}
+% \changes{v1.1}{2018/12/21}{Support bidi}
+% \changes{v1.1}{2018/12/21}{Allow extended rules}
+% \changes{v1.2}{2019/1/1}{Define rule patterns}
+% \changes{v1.2}{2019/1/1}{Allow per-column rule changes}
 %
 %\begin{abstract}
 % The \mcrule{} package lets you customize the appearance of the vertical rule
@@ -184,9 +186,10 @@ and the derived files           multicolrule.ins,
 %\tableofcontents
 %
 %\begin{documentation}
+% \raggedcolumns
 %
-%\begin{multicols}{2}[\section{Introduction}]
-%\SetMCRule{line-style=dashed}
+% \begin{multicols}{2}[\section{Introduction}]
+% \SetMCRule{line-style=dashed}
 %  
 % In\stydsc{line-style=dashed} \LaTeX, there are two lengths that control the
 % formatting between columns of multicolumn text: \cs{columnsep} specifies the
@@ -210,44 +213,49 @@ and the derived files           multicolrule.ins,
 % throughout this guide. The default line-width used is 0.4pt (thin), and the
 % default color is \texttt{Maroon}. You can also find examples of rules created
 % with all available options in the file \file{mcrule-example.pdf}.
+% \end{multicols}
+%
+% \begin{multicols}{2}
+% \SetMCRule{custom-line={\path (TOP) to [ornament=85] (BOT);},extend-top=-24pt,
+%   extend-bot=-8pt}
+% \subsection*{New for Version 1.2}
+% Version\stydsc{custom-line=\\\{\textbackslash path (TOP) to [ornament=85]
+%   (BOT);\}, extend-top=-24pt, extend-bot=-8pt} 1.2 adds the ability to define
+% patterns, which are aliases for a series of \cs{SetMCRule} settings. With
+% patterns, you can change individual separators on the same page. For example,
+% in three-column text, the left separator can differ from the right.
+% You can also alter the appearance of one or more separators anywhere within
+% the environment (see section \ref{sec:patterns}).
 %
 % \subsection*{New for Version 1.1}
-% Version 1.1 now supports drawing decorative rules if you have the \pkg{bidi}
+% Version 1.1 supports drawing decorative rules if you have the \pkg{bidi}
 % package loaded, which can occur automatically if you set a right-to-left
 % language with \pkg{polyglossia}. It also provides a mechanism to extend or
-% shrink rules by fixed amounts, as well as to have the rule fill the available
-% space to the end of the text area (see section \ref{sec:extend}).
-%
+% shrink rules beyond the natural height of the columns, as well as to have the
+% rule fill the available space to the end of the text area (see section
+% \ref{sec:extend}).
 % \end{multicols}
 %
 % \begin{multicols}{2}[\subsection{Bugs and Known Limitations}]
-% There\stydsc{line-style=dots} are likely bugs that remain to be uncovered,
-% as well as missing features and inefficient methods that should be improved
-% upon. The development code is maintained on github
-% (\url{https://github.com/polysyllabic/multicolrule}), and you can file
+% The\stydsc{line-style=dots} \mcrule{} package is written using expl3 syntax,
+% and so requires a less-than-ancient installation of \LaTeX. It requires the
+% packages \pkg{l3keys2e}, \pkg{xparse}, \pkg{xpatch}, \pkg{xcolor},
+% \pkg{scrlfile}, and depending on the mode of operation may also require
+% \pkg{multicol} and \pkg{tikz}. If you have an up-to-date distribution, these
+% requirements should cause no issues.
+%
+% I am sure that there are bugs that remain to be uncovered, inefficient methods
+% that could stand improvement, and useful features that still need to be
+% implemented. The development code is maintained on
+% \href{https://github.com/polysyllabic/multicolrule}{github}, and you can file
 % feature requests or bug reports there. Alternatively, you can send an email
 % to \href{mailto://latex@polysyllabic.com}{latex@polysyllabic.com}. I welcome
 % contributions for additional styles, especially to provide more options when
 % running the package without \pkg{tikz}.
+%
+% The following are the issues I'm currently aware of that aren't \mcrule{}
+% errors but which may cause buggy looking behavior:
 %  
-% The line styles that work by repeating elements in a tiled pattern may have
-% significant gaps at the end of columns, particularly for larger patterns.
-% You can mitigate this problem slightly by tweaking the spaces above and
-% below a pattern, but the basic problem is a side-effect of the way these
-% patterns are implemented (with \cs{cleaders}), which means that only an
-% integer number of copies can be produced. Lines drawn with \pkg{tikz} do not
-% have this problem.
-% 
-% I have also noticed occasional instances, most noticeably when a
-% \env{multicols} environment starts near the bottom of a page and the columns
-% continue to the next one, where the rules are either somewhat shorter than
-% they should be or shifted upward from where they belong. In the limited
-% testing I have done, this appears to be a consequence of how \pkg{multicol}
-% works, as the default rules show the same behavior. I may try to nail down
-% this issue in future version, but as it's an edge case that disappears when
-% you add page breaks or rewrite the text to alter how the columns are filled,
-% it hasn't seemed worth taking the time to fix at this point.
-% 
 % This package works by patching the output routines of either \pkg{multicol}
 % or the \LaTeX{} kernel, depending on the mode of operation. If \pkg{bidi} is
 % loaded, it will also patch that. It will have no effect if you use a class or
@@ -258,11 +266,22 @@ and the derived files           multicolrule.ins,
 % send me an email or file a feature request on github and I'll see what I can
 % do.
 % 
-% \mcrule{} is written using expl3 syntax, and so requires a less-than-ancient
-% installation of \LaTeX. It uses the packages \pkg{l3keys2e}, \pkg{xparse},
-% \pkg{xpatch}, and \pkg{xcolor}, and depending on the mode of operation may
-% also require \pkg{multicol} and \pkg{tikz}. If you have an up-to-date
-% distribution, these requirements should cause no issues.
+% The line styles that work by repeating elements in a tiled pattern may have
+% significant gaps at the end of columns, particularly for larger patterns.
+% You can mitigate this problem slightly by tweaking the spaces above and
+% below a pattern, but the basic problem is a side-effect of the way these
+% patterns are implemented (with \cs{cleaders}), which means that only an
+% integer number of copies can be produced. Lines drawn with \pkg{tikz} do not
+% have this problem.
+%
+% Extending rules beyond their natural column lengths can seriously mess up
+% the output, including, in certain edge cases, causing \pkg{multicol} to
+% overprint columns or even put them in the margins. The fact that the extended
+% rule occupies space on the page instead of extending up into the margin was a
+% deliberate design decision and is necessary to support the
+% \kvdesc{extend-fill} and \kvdesc{extend-reserve} options work correctly. A
+% future version may support drawing the rules to a background layer so that
+% the text is not shifted.
 % \end{multicols}
 %
 % \begin{multicols}{2}[\subsection{License}]
@@ -272,8 +291,11 @@ and the derived files           multicolrule.ins,
 % modified under the conditions of the \LaTeX{} Project Public License, either
 % version 1.3c of this license or (at your option) any later version. The
 % latest version of this license is in
-% \url{http://www.latex-project.org/lppl.txt}.
-%  
+%
+% \medskip
+% \noindent{\footnotesize\url{http://www.latex-project.org/lppl.txt}.}
+% \medskip
+%
 % This work has the LPPL maintenance status `maintained.' The Current
 % Maintainer of this work is Karl Hagen.
 % \end{multicols}
@@ -289,22 +311,6 @@ and the derived files           multicolrule.ins,
 % the appropriate settings \emph{before} you load \mcrule, as \LaTeX{} does not
 % support reloading packages with different parameters.
 % 
-% \subsection{Option `twocolumn'}
-% \DescribeOption{twocolumn}
-% The \mcrule{} package recognizes the option \opt{twocolumn},
-% either as a package option or as a global class option. If you pass this option
-% to your document class, you do not need to pass it a second time to the
-% package. It is only necessary to use the package option if you plan to have a
-% predominantly one-column document and use \cs{twocolumn} to switch
-% temporarily into two-column mode.
-% 
-% Because \pkg{multicol} does not work well with the ordinary two-column
-% mode, \mcrule{} is only designed to work with one or the other at a time. If
-% you try to use the \opt{twocolumn} option when
-% \pkg{multicol} has already been loaded, you will receive a warning, and
-% nothing is guaranteed. But the custom rules will at best only appear in the
-% conventional two-column mode and not within a \env{multicols} environment.
-% 
 % \subsection{Option `tikz'}
 % \DescribeOption{tikz}
 % You have access to a wider set of line styles if you also use the \pkg{tikz}
@@ -318,12 +324,31 @@ and the derived files           multicolrule.ins,
 % (or if it is explicitly disabled), the line styles marked \emph{tikz only}
 % in section \ref{sec:linestyles} will be unavailable and errors will result
 % if you try to use them.
+%
+% \subsection{Option `twocolumn'}
+% \DescribeOption{twocolumn}
+% The \mcrule{} package recognizes the option \opt{twocolumn},
+% either as a package option or as a global class option. If you pass this option
+% to your document class, you do not need to pass it a second time to the
+% package. It is only necessary to use the package option if you plan to have a
+% predominantly one-column document and use \cs{twocolumn} to switch
+% temporarily into two-column mode.
+% 
+% Because \pkg{multicol} does not work well with the ordinary two-column
+% mode, \mcrule{} is only designed to work with one or the other at a time. If
+% you try to use the \opt{twocolumn} option when \pkg{multicol} has already
+% been loaded, you will receive a warning and nothing is guaranteed. But the
+% custom rules will at best only appear in the conventional two-column mode and
+% not within a \env{multicols} environment.
 % \end{multicols}
 %
 % \section{The User Interface}
+% |\SetMCRule| \marg{key-value list}
+%
 % \begin{multicols}{2}
 % \SetMCRule{width=2pt,line-style=circles}
-% The\stydsc{line-style=circles,\\width=2pt} main user command for \mcrule{} is
+% \noindent \DescribeMacro{\SetMCRule}
+% The\stydsc{line-style=circles,\\ width=2pt} main user command for \mcrule{} is
 % \cs{SetMCRule}. It takes one parameter containing a key-value list of all
 % options you want to set. You can issue this command in the preamble or the
 % document body. Changes to the rule settings are local to the current group.
@@ -371,6 +396,12 @@ and the derived files           multicolrule.ins,
 % the column (see sec. \ref{sec:extend})\\
 % \kvdesc{line-style} & Select the type of rule printed 
 % (default=\emph{default}; see sec. \ref{sec:linestyles})\\
+% \kvdesc{pattern-after} & Number of separators to delay before beginning to
+% use the specified patterns (default=0; see sec. \ref{sec:patterns})\\
+% \kvdesc{pattern-for} & Number times separators to apply the patterns to
+% before returning to default (default=$-1$; see sec. \ref{sec:patterns})\\
+% \kvdesc{patterns} & Specify one or more patterns use to draw rules. 
+% (default=\emph{none}; see sec. \ref{sec:patterns})\\
 % \kvdesc{single} & Draw a single copy of the rule (\emph{default};
 % see sec. \ref{sec:repeats})\\
 % \kvdesc{repeat} & Set the number of times to draw the rule (see
@@ -388,17 +419,22 @@ and the derived files           multicolrule.ins,
 %   \label{sec:linestyles}]
 %  \SetMCRule{width=4pt,line-style=solid-circles}
 %  
-% You\stydsc{line-style= solid-circles,\\ width=4pt} choose a style for the rule
-% with the \kvdesc{line-style} key.  If the predefined styles are insufficient,
-% see section \ref{sec:custom} for different ways to customize it. The width of
-% most line styles depends on the setting of \cs{columnseprule}, the default
-% \LaTeX{} length that controls the width of the column rule (see section
-% \ref{sec:width}). 
+% You\stydsc{line-style=solid-circles, width=4pt} can choose a style for the
+% rule with the \kvdesc{line-style} key. If the predefined styles are
+% insufficient for your purpose, see section \ref{sec:custom} for different
+% ways to customize the rule in even more radical ways. The width of many line
+% styles scales directly with the setting of \cs{columnseprule}, the default
+% \LaTeX{} length that controls the width of the column rule, but even those
+% that do not, the width must be non-zero for the rule to display (see section
+% \ref{sec:width}).
 %  
 % Table \ref{table:linestyles} summarizes the available line styles. Most of
 % the basic patterns come in three versions, differing only in how closely the
 % pattern is spaced: normal, dense, and loose. These settings parallel those
-% found in \pkg{tikz}.
+% found in \pkg{tikz} and use the same spacing between elements. There are no
+% named settings for double lines and the like because you control that feature
+% separately, with the \kvdesc{repeat} key. All line styles can be repeated as
+% many times as you like (see section \ref{sec:repeats}).
 % \end{multicols}
 %
 % \begin{longtable}{lp{3in}}
@@ -457,7 +493,7 @@ and the derived files           multicolrule.ins,
 % \bottomrule
 % \end{longtable}
 %
-% \begin{multicols}{2}[\subsubsection{Notes on the Styles}]
+% \begin{multicols}{2}
 % \SetMCRule{width=thin,line-style=solid} 
 % The\stydsc{line-style=solid} \kvdesc{default} and \kvdesc{solid} line styles
 % are nearly the same, except that the \kvdesc{solid} line (as of version 1.1)
@@ -472,14 +508,12 @@ and the derived files           multicolrule.ins,
 % the \kvdesc{width} and \kvdesc{color} keys described in sections
 % \ref{sec:width} and \ref{sec:color}, respectively, or directly by changing
 % the value of \cs{columnseprule} and renewing the \cs{columnseprulecolor}
-% macro. All line styles, including \kvdesc{default}, can be repeated as many
-% times as you like (see section \ref{sec:repeats}).
+% macro.
 %  
 % The \kvdesc{dots} style and its variants are rendered with a period (.) in
-% the currently active font. This means that changing \cs{columnseprule} will
-% not change the size of these dots, although, as with all rules, it will not
-% appear at all if \cs{columnseprule} is set to 0pt. Custom tiles and patterns
-% also do not scale with \cs{columnseprule}.
+% the currently active font. This is one of the styles, mentioned above, that
+% do not change their size as the line width increases. The same is true of
+% custom tiles.
 %
 % The \kvdesc{dotted} styles differ from \kvdesc{dots} in that the former are
 % squares with side lengths equal to \cs{columnseprule}. This mirrors the
@@ -487,7 +521,7 @@ and the derived files           multicolrule.ins,
 % \end{multicols}
 %
 % \subsubsection{Custom Patterns}\label{sec:custom}
-% \noindent\texttt{custom-tile=} \marg{pattern} \marg{space above}
+% \noindent\texttt{custom-tile =} \marg{pattern} \marg{space above}
 %   \marg{space below}
 % \begin{multicols}{2}
 % \SetMCRule{custom-tile={\SparkleBold}{16pt}{16pt}}
@@ -510,7 +544,7 @@ and the derived files           multicolrule.ins,
 % list will be the one that is kept.
 % \end{multicols}
 %
-% \begin{multicols}{2}[\noindent\texttt{custom-pattern=} \marg{pattern} \marg{shift
+% \begin{multicols}{2}[\noindent\texttt{custom-pattern =} \marg{pattern} \marg{shift
 %    down} \marg{shift up}]
 % \SetMCRule{custom-pattern={\HandRight}{0pt}{0pt}} 
 %
@@ -524,25 +558,25 @@ and the derived files           multicolrule.ins,
 % uses the \cs{HandRight} symbol from \pkg{bbding}.
 % \end{multicols}
 %
-% \begin{multicols}{2}[\noindent\texttt{custom-line=} \marg{draw command}]
-% \SetMCRule{width=1pt,custom-line={\draw[line width=\columnseprule] (TOP) to
-%   [ornament=88] (BOT);}}
+% \begin{multicols}{2}[\noindent\texttt{custom-line =} \marg{draw command}]
+% \SetMCRule{custom-line={\path (TOP) to [ornament=88] (BOT);}}
 %
-% The\stydsc{custom-line=\{ \textbackslash draw[line width= \textbackslash
-%   columnseprule] (TOP) to [ornament=88] (BOT);\},\\width=1pt} third custom
+% The\stydsc{custom-line=\{\textbackslash path (TOP) to [ornament=88]
+%   (BOT);\}} third custom
 % pattern involves setting your own \pkg{tikz} drawing
 % function using the key \kvdesc{custom-line}. The rule in this section is
 % drawn with an ornament from \pkg{pgfornaments}. Obviously, this feature
 % requires \pkg{tikz} support. The value you provide to the
 % \kvdesc{custom-line} key should consist of a \pkg{tikz} command, such as
-% \cs{draw}, without the surrounding \env{tikzpicture} environment.
+% \cs{draw} or \cs{path}, without the surrounding \env{tikzpicture}
+% environment.
 % 
 % Before the drawing command is called, \mcrule{} will set up a
 % \env{tikzpicture} with both the x- and y-coordinates scaled to points, and
 % two nodes, named \texttt{(TOP)} and \texttt{(BOT)}, which are set to the
 % coordinates of the top and bottom of the rule. You can then specify your own
-% \cs{draw} function in whatever way you like. The rule separating these
-% columns was drawn with a decorative element from the \pkg{pgfornaments}
+% \cs{draw} or \cs{path} function in whatever way you like. The rule separating
+% these columns was drawn with a decorative element from the \pkg{pgfornaments}
 % package.
 %
 % This function will use the color set in
@@ -626,7 +660,8 @@ and the derived files           multicolrule.ins,
 % adjacent copies of any rule by setting the number of times to draw the rule
 % with the \kvdesc{repeat} key. The space between copies is controlled with the
 % \kvdesc{repeat-distance} key. Initially, this distance is set to
-% \cs{columnseprule}.
+% \cs{columnseprule}. Note that you must enter an actual dimension expression
+% for this distance. The names used for line widths are not accepted.
 %  
 % The keys \kvdesc{single}, \kvdesc{double}, and \kvdesc{triple} are shorthand
 % methods to set the number of repeats and the \kvdesc{repeat-distance} at the
@@ -682,9 +717,10 @@ and the derived files           multicolrule.ins,
 %\DeclareMCRulePattern{left-hand}{custom-tile={\HandLeft}{8pt}{8pt}}
 %\DeclareMCRulePattern{right-hand}{custom-tile={\HandRight}{8pt}{8pt}}
 %\begin{multicols}{3}
+% \noindent \DescribeMacro{\DeclareMCRulePattern}
 % \SetMCRule{patterns={right-hand,left-hand}}
-%
-% A ``pattern'' refers to a bundle of settings used by \mcrule. You can declare
+% A\stydsc{patterns=\{right-hand, left-hand\}\\ See the code sample below for
+% the definitions of the patterns} ``pattern'' refers to a bundle of settings used by \mcrule. You can declare
 % a pattern for a line style with the command \cs{DeclareMCRulePattern}. The
 % \meta{name} should consist of letters and hyphens only. The
 % \meta{key-value list} can contain all keys that are valid for \cs{SetMCRule}
@@ -711,7 +747,24 @@ and the derived files           multicolrule.ins,
 % cycle will pick up where it left off. Every time you set new patternss,
 % however, the cycle begins anew.
 %
-% If you want to alter the rule only for certain column separators, you can use
+%\end{multicols}
+%
+% The columns above were defined with the following:
+%\begin{verbatim}
+% \DeclareMCRulePattern{left-hand}{custom-tile={\HandLeft}{8pt}{8pt}}
+% \DeclareMCRulePattern{right-hand}{custom-tile={\HandRight}{8pt}{8pt}}
+% \begin{multicols}{3}
+%   \SetMCRule{patterns={right-hand,left-hand}}
+%   ...
+% \end{multicols}
+%\end{verbatim}
+%
+%\DeclareMCRulePattern{shrink-me}{line-style=solid,extend-top=-3\baselineskip}
+%\begin{multicols}{3}
+% \SetMCRule{line-style=solid,patterns=shrink-me,pattern-for=1}  
+% If\stydsc{patterns=shrink-me, pattern-for=1\\ See the code sample below for
+% the definition of `shrink-me'} you want to alter the rule only for certain
+% column separators, you can use
 % the \kvdesc{pattern-after} and \kvdesc{pattern-for} keys, both of which
 % take integer values, in conjunction with \kvdesc{patterns}. 
 %
@@ -725,17 +778,7 @@ and the derived files           multicolrule.ins,
 % separators before starting to apply the pattern. The default is 0. If you use
 % it in conjunction with \kvdesc{pattern-for}, the count of modified column
 % separators begins after the skipped columns.
-%\end{multicols}
 %
-%\begin{verbatim}
-%\DeclareMCRulePattern {foo} {some keys\dots}
-%\begin{multicols}{4}
-%  \SetMCRule{patterns=foo, pattern-after=2, pattern-for=1}
-% Your text...
-%\end{multicols}
-%\end{verbatim}
-%
-%\begin{multicols}{3}
 % For example, suppose you have four-column text and want to alter the third
 % column separator on the first page of the environment only.\footnote{Remember
 % that you have one less column separator than you have columns.} You could
@@ -744,13 +787,24 @@ and the derived files           multicolrule.ins,
 % Using predefined patterns adds processing overhead, since they must be
 % applied each time the rule is drawn. Therefore it is more efficient to avoid
 % patterns unless you need to actually change the line style from column to
-% column.
+% column, although if you compile on a reasonably modern computer, you are
+% unlikely to notice too much delay.
 %
 % Note that any settings you provide in the same command where you apply a 
 % \kvdesc{patterns} key do not alter definition of the pattern. If you do this,
 % you are altering the settings in effect before the pattern is applied.
 %
 %\end{multicols}
+
+% Shrinking the final two column separators in four-column text:
+%\begin{verbatim}
+% \DeclareMCRulePattern{shrink-me}{line-style=solid,
+%    extend-top=-3\baselineskip}
+% \begin{multicols}{4}
+%   \SetMCRule{patterns=shrink-me,pattern-after=1,pattern-for=2}
+%   ...
+% \end{multicols}
+%\end{verbatim}
 %
 %\end{documentation}
 %
