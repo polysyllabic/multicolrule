@@ -144,15 +144,22 @@ and the derived files           multicolrule.ins,
 %   \bool_lazy_and:nnT,\cs_gset_eq:NN,\bool_if_p:n,\bool_lazy_and:nnTF,
 %   \bool_not_p:n,\bool_new:N,\box_ht:N,\box_dp:N,\box_move_down:nn,
 %   \cs_generate_variant:Nn,\cs_gset:Npn,\cs_new:Npn,
-%   \cs_new_nopar:Npn,\cs_set:Npn,\dim_compare_p:nNn,\dim_new:N,\dim_set:Nn,
+%   \cs_new_nopar:Npn,\cs_set:Npn,
+%   \c_one_int,\c_zero_dim,\c_zero_int,
+%   \dim_compare_p:nNn,\dim_new:N,\dim_set:Nn,
 %   \dim_compare:nNnTF,\dim_eval:n,\dimen,
 %   \end,\ExplSyntaxOff,\ExplSyntaxOn,\fill,\hbox:n,\hspace,\ht,
-%   \int_compare_p:nNn,\int_new:N,\int_set:Nn,\kern,\keys_define:nn,
-%   \keys_set:nn,\msg_error:nnn,\msg_info:nnn,\msg_new:nnn,\msg_warning:nn,
+%   \int_compare_nNnTF,\int_compare_p:nNn,
+%   \int_gdecr:N,\int_gincr:N,\int_gset:Nn,\int_gzero:N,
+%   \int_new:N,\int_set:Nn,\kern,\keys_define:nn,
+%   \keys_set:nn,\keys_set_finter:nnn,
+%   \msg_error:nnn,\msg_info:nnn,\msg_new:nnn,\msg_new:nnnn,\msg_warning:nn,
 %   \NewDocumentCommand,\node,\prg_replicate:nn,\ProcessKeysOptions,
+%   \prop_get:NnNTF,\prop_gput:Nnn,\prop_item:Nn,\prop_new:N,
 %   \ProvidesExplPackage,\RequirePackage,\rule,\normalcolor,
-%   \tl_if_empty:NT,\tl_if_empty:NTF,\tl_new:N,\tw@,
-%   \tl_set:Nn,\vbox:n,\vbox_to_ht:nn,\vfill,\vrule,
+%   \seq_count:N,\seq_item:Nn,\seq_new:N,\seq_set_split:Nnn,
+%   \tl_if_blank:VF,\tl_if_empty:NT,\tl_if_empty:NTF,\tl_new:N,\tl_set:Nn,
+%   \tl_set:Nx,\tw@,\vbox:n,\vbox_to_ht:nn,\vfill,\vrule,\l_tmpa_tl,
 %   \cs_new_protected:Npn,\@ifpackageloaded,\@width,\xpatchcmd}
 %
 %\title{^^A
@@ -287,7 +294,7 @@ and the derived files           multicolrule.ins,
 % \begin{multicols}{2}[\subsection{License}]
 % \SetMCRule{width=ultra-thick,line-style=dotted}
 % The\stydsc{\texttt{line-style=dotted, width=ultra-thick}} \mcrule{}
-% package is copyright 2018 by Karl Hagen. It may be distributed and/or
+% package is copyright 2018--2019 by Karl Hagen. It may be distributed and/or
 % modified under the conditions of the \LaTeX{} Project Public License, either
 % version 1.3c of this license or (at your option) any later version. The
 % latest version of this license is in
@@ -304,8 +311,8 @@ and the derived files           multicolrule.ins,
 % \SetMCRule{line-style=dash-dot}
 %
 % \subsection{Default Operation}
-% If\stydsc{line-style=dash-dot} you load \mcrule{} with its default settings,
-% it will enable \pkg{multicol} support, and that package will be loaded if it
+% Loading\stydsc{line-style=dash-dot} \mcrule{} with its default settings
+% enables \pkg{multicol} support, and that package will be loaded if it
 % hasn't been already. Note that if you need to pass any parameters to
 % \pkg{multicol}, such as |docolaction|, you should load \pkg{multicol} with
 % the appropriate settings \emph{before} you load \mcrule, as \LaTeX{} does not
@@ -313,7 +320,7 @@ and the derived files           multicolrule.ins,
 % 
 % \subsection{Option `tikz'}
 % \DescribeOption{tikz}
-% You have access to a wider set of line styles if you also use the \pkg{tikz}
+% You can use more line styles if you also use the \pkg{tikz}
 % package. Some line styles are only available if \pkg{tikz} is enabled, and
 % others look better with it. The default behavior of \mcrule{} depends on the
 % status of the \pkg{tikz} package at the time \mcrule{} is loaded. If
@@ -823,7 +830,7 @@ and the derived files           multicolrule.ins,
 %\subsection{Preliminaries}
 %
 %    \begin{macrocode}
-\ProvidesExplPackage {multicolrule} {2018/12/31} {1.2}
+\ProvidesExplPackage {multicolrule} {2019/01/01} {1.2}
   {Decorative vertical rules between columns}
 %    \end{macrocode}
 %
@@ -872,7 +879,6 @@ and the derived files           multicolrule.ins,
 %  \l_@@_extend_reserve_dim}
 % Variables to control the distance to extend the rule above and below the
 % natural column height.
-%\changes{v1.1}{2018/12/21}{New variables}
 %    \begin{macrocode}
 \dim_new:N  \l_@@_extend_top_dim
 \dim_new:N  \l_@@_extend_bot_dim
@@ -894,7 +900,6 @@ and the derived files           multicolrule.ins,
 % \g_@@_pattern_for_int, \g_@@_pattern_after_int,
 % \l_@@_pattern_list_seq}
 % Variables to support defined patterns.
-%\changes{v1.2}{2018/12/31}{New variables}
 %    \begin{macrocode}
 \prop_new:N \g_@@_patterns_prop
 \int_new:N  \g_@@_pattern_count_int
@@ -939,16 +944,15 @@ and the derived files           multicolrule.ins,
 %    \end{macrocode}
 %\end{function}
 %
+%\begin{function}{\@@_patch_mcol_output:N}
 % Now that we know what mode we're going to run in, we patch the output
 % routine(s) to substitute our custom rule for the vanilla one. Since
 % \pkg{multicol} doesn't fully support twocolumn mode, we patch one or the
 % other, but not both. As of version 1.2, we make \cs{columnseprulecolor}
 % part of \cs{mcruledivider} so that we can set the color as part of a
 % style pattern.
-%
-%\begin{function}{\@@_patch_mcol_output:N}
-%\changes{v1.2}{2018/12/31}{Move \cs{columnseprulecolor} inside
-  %   \cs{mcruledivider}}
+% \changes{v1.2}{2019/1/1}{Move \cs{columnseprulecolor} inside
+%   \cs{mcruledivider}}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_patch_mcol_output:N #1
 {
@@ -961,7 +965,8 @@ and the derived files           multicolrule.ins,
 %\end{function}
 %
 %\begin{function}{\@@_patch_twocol_output:N}
-%\changes{v1.2}{2018/12/31}{Move \cs{columnseprulecolor} inside
+% The same idea as above, only for the vanilla twocolumn mode.
+% \changes{v1.2}{2019/1/1}{Move \cs{columnseprulecolor} inside
 %   \cs{mcruledivider}}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_patch_twocol_output:N #1
@@ -999,8 +1004,6 @@ and the derived files           multicolrule.ins,
 % after \pkg{xcolor}, \pkg{tikz}, \emph{and} \pkg{multicol}, so it must always
 % be loaded after us. We use \cs{AfterPackage} from \pkg{scrlfile} to insert
 % the patch if \pkg{bidi} is loaded later on.
-%\changes{v1.1}{2018/12/21}{Support for bidi package}
-%
 %    \begin{macrocode}
   \AfterPackage!{bidi}
   {
@@ -1071,7 +1074,7 @@ and the derived files           multicolrule.ins,
 %
 % This is the function directly called by the patched output routines. It
 % has a \LaTeX2 name so the user can redefine it if necessary. Its main
-% function is to call the internal function \cs{_@@_divider:}, which contains
+% function is to call the internal function \cs{mcrule_divider:}, which contains
 % the actual rule-typesetting instructions, the number of times specified in
 % \cs{l_@@_repeat_int}.  \pkg{multicol} puts the rule in a group
 % in order to keep the color contained, which means that any local changes
@@ -1079,7 +1082,7 @@ and the derived files           multicolrule.ins,
 % pattern, if any, here in order to support having different line styles
 % between different columns.
 %
-%\changes{v1.2}{2018/12/31}{Add pattern support}
+% \changes{v1.2}{2019/1/1}{Add pattern support}
 %    \begin{macrocode}
 \cs_new_protected:Npn \mcruledivider
 {
@@ -1123,7 +1126,7 @@ and the derived files           multicolrule.ins,
 %    \begin{macrocode}
   \columnseprulecolor
 %    \end{macrocode}
-% We only call \cs{@@_divider:} if \cs{columnseprule} $>0$, so that all
+% We only call \cs{mcrule_divider:} if \cs{columnseprule} $>0$, so that all
 % line styles can be turned off by setting it to 0, just as is the case with
 % the vanilla rules.
 %    \begin{macrocode}
@@ -1131,11 +1134,11 @@ and the derived files           multicolrule.ins,
   {\dim_compare_p:nNn {\columnseprule} > {\c_zero_dim}}
   {\int_compare_p:nNn {\l_@@_repeat_int} > {\c_zero_int}}
   {
-    \@@_divider:
+    \mcrule_divider:
     \prg_replicate:nn {\l_@@_repeat_int - \c_one_int}
     {
       \hspace{\l_@@_repeat_distance_dim}
-      \@@_divider:
+      \mcrule_divider:
     }
   }
 }
@@ -1143,10 +1146,7 @@ and the derived files           multicolrule.ins,
 %\end{macro}
 %
 %\begin{function}{\@@_column_total_height:,\@@_column_total_depth:}
-%
 % Get column height and depth with any explicit alterations.
-%\changes{v1.1}{2018/12/21}{New functions}
-%
 %    \begin{macrocode}
 \cs_new:Npn \@@_column_total_height:
 {
@@ -1161,14 +1161,11 @@ and the derived files           multicolrule.ins,
 %\end{function}
 %
 %\begin{function}{\@@_extend_column_top:}
-%
 % Currently, the extend amount for the top is just the 
 % |\l_@@_extend_top_dim| distance. In the future we may allow more complex
 % criteria, such as by odd or even page, or on a particular page. Although
 % these might theoretically be useful, I'm not going to implement them until
 % someone comes along with a use-case for it.
-%\changes{v1.1}{2018/12/21}{New function}
-%
 %    \begin{macrocode}
 \cs_new:Npn \@@_extend_column_top:
 {
@@ -1178,14 +1175,10 @@ and the derived files           multicolrule.ins,
 %\end{function}
 %
 %\begin{function}{\@@_extend_column_bottom:}
-%
 % The |extend-fill| option, which is only applicable with \pkg{multicol},
 % extends the rule from the bottom of the column to the end of the text area,
 % minus whatever reserved space the user specifies. If there's less space
 % available than requested, we give everything we can.
-%\changes{v1.1}{2018/12/21}{New function}
-%\changes{v1.2}{2018/12/31}{Use predefined constants}
-%
 %    \begin{macrocode}
 \cs_new:Npn \@@_extend_column_bottom:
 {
@@ -1204,12 +1197,8 @@ and the derived files           multicolrule.ins,
 %\end{function}
 %
 %\begin{function}{\@@_extend_reserve:}
-%
 % The reserved space is the amount of user-provided space we want, but we also
 % have to account for the space added with \cs{multicolsep}.
-%\changes{v1.1}{2018/12/21}{New function}
-%\changes{v1.2}{2018/12/31}{Use predefined constants}
-%
 %    \begin{macrocode}
 \cs_new:Npn \@@_extend_reserve:
 {
@@ -1220,14 +1209,13 @@ and the derived files           multicolrule.ins,
 %    \end{macrocode}
 %\end{function}
 %
-%\begin{function}{\@@_divider:}
-% This is the internal routine that contains the instructions to draw one copy
+%\begin{function}{\mcrule_divider:}
+% This is the routine that contains the instructions to draw one copy
 % of rule between columns. The default is identical to the original definition
 % used by \pkg{multicol}. It will be reset each time the user calls
 % \cs{MCSetRule} to specify a new line style.
-%
 %    \begin{macrocode}
-\cs_new:Npn \@@_divider: {\vrule\@width\columnseprule}
+\cs_new:Npn \mcrule_divider: {\vrule\@width\columnseprule}
 %    \end{macrocode}
 %\end{function}
 %
@@ -1239,8 +1227,6 @@ and the derived files           multicolrule.ins,
 % box that is the height of the current column. The pattern must be
 % something that can go in a horizontal box. The spaces above and below
 % must be fixed dimensions. 
-%\changes{v1.1a}{2018/12/24}{Use ...:D commands for \TeX{} primitives}
-% 
 %    \begin{macrocode}
 \cs_new_nopar:Npn \@@_pattern:nnn #1#2#3
 {
@@ -1265,7 +1251,6 @@ and the derived files           multicolrule.ins,
 % that is the height of the current column. The pattern must be something
 % that can go in a horizontal box. The spaces above and below must be fixed
 % dimensions. 
-%\changes{v1.1a}{2018/12/24}{Use ...:D commands for \TeX{} primitives}
 %    \begin{macrocode}
 \cs_new_nopar:Npn \@@_tile_pattern:nnn #1#2#3
 {
@@ -1444,13 +1429,10 @@ and the derived files           multicolrule.ins,
 % \subsection{Patterns}
 %
 %\begin{function}{\@@_set_pattern_list:n}
-%  
-% Sets a comma-separated list of patternss as a sequence for later use. The
+% Sets a comma-separated list of patterns as a sequence for later use. The
 % global counter that indicates where we are in the list is also reset here, so
 % setting a list of patterns always means that the next rule will use the first
 % pattern in the list.
-% 
-%\changes{v1.2}{2018/12/31}{New function}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_set_pattern_list:n #1
 {
@@ -1466,8 +1448,6 @@ and the derived files           multicolrule.ins,
 %  
 % Set the keys an individual pattern. To avoid potential recursion and loops,
 % we filter out the key `pattern' when it appears in a pattern definition.
-% 
-%\changes{v1.2}{2018/12/31}{New function}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_set_pattern:n #1
 {
@@ -1486,10 +1466,10 @@ and the derived files           multicolrule.ins,
 %
 % \subsection{Key-Values}
 % Set up all the key definitions. For the line styles, this involves
-% resetting \cs{_@@_divider:} to an appropriate value.
-%\changes{v1.1}{2018/12/21}{Added extend-top, extend-bot, extend-fill, and
+% resetting \cs{mcrule_divider:} to an appropriate value.
+% \changes{v1.1}{2018/12/21}{Added extend-top, extend-bot, extend-fill, and
 %   extend-reserve keys}
-%\changes{v1.2}{2018/12/31}{Added patterns, pattern-after, and pattern-for
+% \changes{v1.2}{2019/1/1}{Added patterns, pattern-after, and pattern-for
 %   keys}
 %
 %    \begin{macrocode}
@@ -1501,51 +1481,51 @@ and the derived files           multicolrule.ins,
   extend-fill                      .default:n = true,
   extend-reserve                   .dim_set:N  = \l_@@_extend_reserve_dim,
   line-style                       .choice:,
-  line-style / default             .code:n = \cs_set:Npn \@@_divider: 
+  line-style / default             .code:n = \cs_set:Npn \mcrule_divider: 
     {\vrule\@width\columnseprule},
-  line-style / solid               .code:n = \cs_set:Npn \@@_divider: 
+  line-style / solid               .code:n = \cs_set:Npn \mcrule_divider: 
     {\@@_solid_line:},
-  line-style / dots                .code:n = \cs_set:Npn \@@_divider:
+  line-style / dots                .code:n = \cs_set:Npn \mcrule_divider:
     {\@@_tile_pattern:nnn {.}{1pt}{1pt}},
-  line-style / dense-dots          .code:n = \cs_set:Npn \@@_divider: 
+  line-style / dense-dots          .code:n = \cs_set:Npn \mcrule_divider: 
     {\@@_tile_pattern:nnn {.}{1pt}{0pt}},
-  line-style / loose-dots          .code:n = \cs_set:Npn \@@_divider:
+  line-style / loose-dots          .code:n = \cs_set:Npn \mcrule_divider:
     {\@@_tile_pattern:nnn {.}{2pt}{2pt}},
-  line-style / circles             .code:n = \cs_set:Npn \@@_divider: 
+  line-style / circles             .code:n = \cs_set:Npn \mcrule_divider: 
     {\@@_tile_pattern:nnn {\@@_circle:}{1pt}{1pt}},
-  line-style / dense-circles       .code:n = \cs_set:Npn \@@_divider:
+  line-style / dense-circles       .code:n = \cs_set:Npn \mcrule_divider:
     {\@@_tile_pattern:nnn {\@@_circle:}{1pt}{0pt}},
-  line-style / loose-circles       .code:n = \cs_set:Npn \@@_divider: 
+  line-style / loose-circles       .code:n = \cs_set:Npn \mcrule_divider: 
     {\@@_tile_pattern:nnn {\@@_circle:}{2pt}{2pt}},
-  line-style / solid-circles       .code:n = \cs_set:Npn \@@_divider: 
+  line-style / solid-circles       .code:n = \cs_set:Npn \mcrule_divider: 
     {\@@_tile_pattern:nnn {\@@_solid_circle:}{1pt}{1pt}},
-  line-style / dense-solid-circles .code:n = \cs_set:Npn \@@_divider:
+  line-style / dense-solid-circles .code:n = \cs_set:Npn \mcrule_divider:
     {\@@_tile_pattern:nnn {\@@_solid_circle:}{1pt}{0pt}},
-  line-style / loose-solid-circles .code:n = \cs_set:Npn \@@_divider:
+  line-style / loose-solid-circles .code:n = \cs_set:Npn \mcrule_divider:
     {\@@_tile_pattern:nnn {\@@_solid_circle:}{2pt}{2pt}},
-  line-style / dotted              .code:n = \cs_set:Npn \@@_divider: 
+  line-style / dotted              .code:n = \cs_set:Npn \mcrule_divider: 
     {\@@_line_pattern:nnnn {dotted}{\columnseprule}{1pt}{1pt}},
-  line-style / densely-dotted      .code:n = \cs_set:Npn \@@_divider:
+  line-style / densely-dotted      .code:n = \cs_set:Npn \mcrule_divider:
     {\@@_line_pattern:nnnn {densely~dotted}{\columnseprule}{1pt}{0pt}},
-  line-style / loosely-dotted      .code:n = \cs_set:Npn \@@_divider:
+  line-style / loosely-dotted      .code:n = \cs_set:Npn \mcrule_divider:
     {\@@_line_pattern:nnnn {loosely~dotted}{\columnseprule}{2pt}{2pt}},
-  line-style / dashed              .code:n = \cs_set:Npn \@@_divider:
+  line-style / dashed              .code:n = \cs_set:Npn \mcrule_divider:
     {\@@_line_pattern:nnnn {dashed}{3pt}{1.5pt}{1.5pt}},
-  line-style / densely-dashed      .code:n = \cs_set:Npn \@@_divider:
+  line-style / densely-dashed      .code:n = \cs_set:Npn \mcrule_divider:
     {\@@_line_pattern:nnnn {densely~dashed}{3pt}{1pt}{1pt}},
-  line-style / loosely-dashed      .code:n = \cs_set:Npn \@@_divider: 
+  line-style / loosely-dashed      .code:n = \cs_set:Npn \mcrule_divider: 
     {\@@_line_pattern:nnnn {loosely~dashed}{3pt}{3pt}{3pt}},
-  line-style / dash-dot            .code:n = \cs_set:Npn \@@_divider:
+  line-style / dash-dot            .code:n = \cs_set:Npn \mcrule_divider:
     {\@@_pattern_line:n{dash~dot}},
-  line-style / densely-dash-dot    .code:n = \cs_set:Npn \@@_divider: 
+  line-style / densely-dash-dot    .code:n = \cs_set:Npn \mcrule_divider: 
     {\@@_pattern_line:n{densely~dash~dot}},
-  line-style / loosely-dash-dot    .code:n = \cs_set:Npn \@@_divider:
+  line-style / loosely-dash-dot    .code:n = \cs_set:Npn \mcrule_divider:
     {\@@_pattern_line:n{loosely~dash~dot}},
-  line-style / dash-dot-dot         .code:n = \cs_set:Npn \@@_divider:
+  line-style / dash-dot-dot         .code:n = \cs_set:Npn \mcrule_divider:
     {\@@_pattern_line:n{dash~dot~dot}},
-  line-style / densely-dash-dot-dot .code:n = \cs_set:Npn \@@_divider:
+  line-style / densely-dash-dot-dot .code:n = \cs_set:Npn \mcrule_divider:
     {\@@_pattern_line:n{densely~dash~dot~dot}},
-  line-style / loosely-dash-dot-dot .code:n = \cs_set:Npn \@@_divider:
+  line-style / loosely-dash-dot-dot .code:n = \cs_set:Npn \mcrule_divider:
     {\@@_pattern_line:n{loosely~dash~dot~dot}},
   color                             .code:n = {
     \tl_set:Nn \l_@@_color_name_tl {#1}
@@ -1555,11 +1535,11 @@ and the derived files           multicolrule.ins,
     \tl_set:Nn \l_@@_color_model_tl {#1}
     \@@_set_rule_color:
   },
-  custom-line         .code:n = \cs_set:Npn \@@_divider:
+  custom-line         .code:n = \cs_set:Npn \mcrule_divider:
     {\@@_tikz_picture:n {#1}},
-  custom-pattern      .code:n = \cs_set:Npn \@@_divider:
+  custom-pattern      .code:n = \cs_set:Npn \mcrule_divider:
     {\@@_pattern:nnn #1},
-  custom-tile         .code:n = \cs_set:Npn \@@_divider:
+  custom-tile         .code:n = \cs_set:Npn \mcrule_divider:
     {\@@_tile_pattern:nnn #1},
   width               .choice:,
   width / ultra-thin  .code:n = \dim_set:Nn \columnseprule {0.1pt},
@@ -1624,11 +1604,8 @@ and the derived files           multicolrule.ins,
 %    \end{macrocode}
 %\end{macro}
 %
-%</package>
 %\end{implementation}
 %
 % \PrintChanges
-%
-% \newpage
 %
 % \PrintIndex
