@@ -1225,8 +1225,9 @@ and the derived files           multicolrule.ins,
 %  \end{syntax}
 % Typesets a single copy of a pattern, vertically centered, in a vertical
 % box that is the height of the current column. The pattern must be
-% something that can go in a horizontal box. The spaces above and below
-% must be fixed dimensions. 
+% something that can go in a horizontal box. The \meta{space above} and
+% \meta{space below} arguments must be dimension expressions.
+% \changes{1.2a}{2018/01/02}{Allow evaluated dimensions for kens}
 %    \begin{macrocode}
 \cs_new_nopar:Npn \@@_pattern:nnn #1#2#3
 {
@@ -1235,7 +1236,9 @@ and the derived files           multicolrule.ins,
     \vbox_to_ht:nn {\@@_column_total_height:}
     {
       \tex_vfill:D
-      \tex_kern:D #2 \hbox:n{#1} \tex_kern:D #3
+      \tex_kern:D \dim_eval:n {#2} \exp_stop_f:
+      \hbox:n{#1}
+      \tex_kern:D \dim_eval:n {#3} \exp_stop_f:
       \tex_vfill:D
     }
   }
@@ -1249,8 +1252,9 @@ and the derived files           multicolrule.ins,
 %  \end{syntax}
 % Typesets multiple copies of pattern, tiled so as to occupy a vertical box
 % that is the height of the current column. The pattern must be something
-% that can go in a horizontal box. The spaces above and below must be fixed
-% dimensions. 
+% that can go in a horizontal box. The \meta{space above} and
+% \meta{space below} arguments must be dimension expressions.
+% \changes{1.2a}{2018/01/02}{Allow evaluated dimensions for kens}
 %    \begin{macrocode}
 \cs_new_nopar:Npn \@@_tile_pattern:nnn #1#2#3
 {
@@ -1260,7 +1264,9 @@ and the derived files           multicolrule.ins,
     {
       \tex_cleaders:D \vbox:n
       {
-        \tex_kern:D #2 \hbox:n{#1} \tex_kern:D #3
+        \tex_kern:D \dim_eval:n {#2} \exp_stop_f:
+        \hbox:n{#1}
+        \tex_kern:D \dim_eval:n {#3} \exp_stop_f:
       }
     \tex_vfill:D
     }
