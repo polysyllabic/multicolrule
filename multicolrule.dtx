@@ -147,12 +147,13 @@ and the derived files           multicolrule.ins,
 %   \cs_new_nopar:Npn,\cs_set:Npn,
 %   \c_one_int,\c_zero_dim,\c_zero_int,
 %   \dim_compare_p:nNn,\dim_new:N,\dim_set:Nn,
-%   \dim_compare:nNnTF,\dim_eval:n,\dimen,
-%   \end,\ExplSyntaxOff,\ExplSyntaxOn,\fill,\hbox:n,\hspace,\ht,
-%   \int_compare_nNnTF,\int_compare_p:nNn,
+%   \dim_compare:nNnTF,\dim_eval:n,\dim_max:nn,\dimen,
+%   \end,\ExplSyntaxOff,\ExplSyntaxOn,\exp_stop_f:,
+%   \fill,\fp_to_dim:n,\hbox:n,\hspace,\ht,
+%   \int_compare:nNnTF,\int_compare:nNnT,\int_compare_p:nNn,
 %   \int_gdecr:N,\int_gincr:N,\int_gset:Nn,\int_gzero:N,
 %   \int_new:N,\int_set:Nn,\kern,\keys_define:nn,
-%   \keys_set:nn,\keys_set_finter:nnn,
+%   \keys_set:nn,\keys_set_filter:nnV,
 %   \msg_error:nnn,\msg_info:nnn,\msg_new:nnn,\msg_new:nnnn,\msg_warning:nn,
 %   \NewDocumentCommand,\node,\prg_replicate:nn,\ProcessKeysOptions,
 %   \prop_get:NnNTF,\prop_gput:Nnn,\prop_item:Nn,\prop_new:N,
@@ -179,6 +180,7 @@ and the derived files           multicolrule.ins,
 % \changes{v1.1}{2018/12/21}{Allow extended rules}
 % \changes{v1.2}{2019/1/1}{Define rule patterns}
 % \changes{v1.2}{2019/1/1}{Allow per-column rule changes}
+% \changes{v1.2a}{2019/2/12}{Improve documentation}
 %
 %\begin{abstract}
 % The \mcrule{} package lets you customize the appearance of the vertical rule
@@ -210,7 +212,7 @@ and the derived files           multicolrule.ins,
 % Of course it's a legitimate question why anyone should \emph{want} to change
 % this rule, or indeed use one at all, as good typography tends to avoid using
 % large vertical lines.\footnote{See, for example, the remarks in the
-% documentation for the \pkg{booktabs} package} In my own case, I needed to
+% documentation for the \pkg{booktabs} package.} In my own case, I needed to
 % modify the rule because of the requirements of a particular style I was
 % imitating, and having done the hard work of creating the necessary
 % infrastructure for one line style, it was simple to extend the solution to a
@@ -272,7 +274,7 @@ and the derived files           multicolrule.ins,
 % whether this is the case. If you would like support for one of these, please
 % send me an email or file a feature request on github and I'll see what I can
 % do.
-% 
+%
 % The line styles that work by repeating elements in a tiled pattern may have
 % significant gaps at the end of columns, particularly for larger patterns.
 % You can mitigate this problem slightly by tweaking the spaces above and
@@ -284,11 +286,10 @@ and the derived files           multicolrule.ins,
 % Extending rules beyond their natural column lengths can seriously mess up
 % the output, including, in certain edge cases, causing \pkg{multicol} to
 % overprint columns or even put them in the margins. The fact that the extended
-% rule occupies space on the page instead of extending up into the margin was a
-% deliberate design decision and is necessary to support the
-% \kvdesc{extend-fill} and \kvdesc{extend-reserve} options work correctly. A
-% future version may support drawing the rules to a background layer so that
-% the text is not shifted.
+% rule affects the vertical layout was a deliberate design decision and is
+% necessary to support the \kvdesc{extend-fill} and \kvdesc{extend-reserve}
+% options. A future version may support drawing the rules to a background layer
+% so that the text is not shifted.
 % \end{multicols}
 %
 % \begin{multicols}{2}[\subsection{License}]
@@ -393,6 +394,8 @@ and the derived files           multicolrule.ins,
 % (see sec. \ref{sec:custom})\\
 % \kvdesc{double} & Draw two copies of the rule (see sec.
 % \ref{sec:repeats})\\
+% \kvdesc{expand} & Change the extend distance by the same amount at the top
+% and bottom of the column (see sec. \ref{sec:extend})\\
 % \kvdesc{extend-bot} & Set an extra amount to extend the rule at the bottom of
 % the column (see sec. \ref{sec:extend})\\
 % \kvdesc{extend-fill} & Extend rule to the bottom of the text area
@@ -415,6 +418,8 @@ and the derived files           multicolrule.ins,
 % sec. \ref{sec:repeats})\\
 % \kvdesc{repeat-distance} & Set the horizontal space between
 % adjacent copies of repeated rules (see sec. \ref{sec:repeats})\\
+% \kvdesc{shift} & Shift the extend distance downward; this affects both the
+% top and bottom of the column (see sec. \ref{sec:extend})\\
 % \kvdesc{triple} & Draw three copies of the rule (see sec.
 % \ref{sec:repeats})\\
 % \kvdesc{width} & Set the width of the rule (see sec.
@@ -589,9 +594,16 @@ and the derived files           multicolrule.ins,
 % This function will use the color set in
 % \cs{columnseprulecolor} if you don't set it explicitly within the tikz
 % command, but you must provide everything else necessary to draw the line
-% correctly, including the line width. Note that this function should be
-% considered experimental. It works for single-line commands such as the one
-% shown in the example, but I haven't tested it with anything more elaborate. 
+% correctly, including the line width. Note that nothing limits you to drawing
+% a picture that fits within the space between the columns. If the rule is
+% wider than the available space, it will be centered between the columns and
+% overlap the text. Normally, of course, that will be undesirable, but you can
+% use it to your advantage in certain cases. The file \file{mcrule-example.pdf}
+% contains examples showing the effect of a rule that is too wide, as well as
+% a custom rule which includes horizontal rules at the top and bottom of the
+% column.\footnote{This latter rule was developed as an answer to
+% \href{https://tex.stackexchange.com/questions/473828/horizontal-rules-before-and-after-multicols}
+% {StackExchange question 473828}.}
 % \end{multicols}
 %
 % \begin{multicols}{2}[\subsection{Colors}\label{sec:color}]
@@ -681,33 +693,49 @@ and the derived files           multicolrule.ins,
 % \end{multicols}
 %
 %\begin{multicols}{2}[\subsection{Extended Rules}\label{sec:extend}]
-% \SetMCRule{line-style=dashed,extend-top=-16pt,extend-bot=-16pt}
+% \SetMCRule{line-style=dashed,expand=-16pt}
 %
-% You\stydsc{line-style=dashed, extend-top=-16pt, extend-bot=-16pt} can specify
-% an additional amount by which the top or bottom of the rule projects beyond
-% the column's natural length with the keys \kvdesc{extend-top} and
-% \kvdesc{extend-bot}, each of which can be set to a dimension expression.
-% Extending the top of the rule with a positive dimension will push the columns
-% down from any preceding material. A positive value for \kvdesc{extend-bot}
-% does the same in the other direction when a column ends in the middle of a
-% page, but the rule will extend into the the bottom margin if the column goes
-% to the end of the page, and so you probably only want to use this in very
-% limited situations where you need a special effect for one column or a small
-% \env{multicol} environment. Overprinting and other bizarre effects can
-% result from extending the rule in the wrong place. Negative values for both
-% keys may be more generally useful, as they have the effect of shrinking the
-% rule. This behavior is illustrated with the rule for this section.
+% You\stydsc{line-style=dashed, expand=-16pt} can specify an additional amount
+% by which the top or bottom of the rule projects beyond the column's natural
+% length with the keys \kvdesc{extend-top} and \kvdesc{extend-bot}, each of
+% which can be set to a dimension expression. Extending the top of the rule
+% with a positive dimension will push the columns down from any preceding
+% material. A positive value for \kvdesc{extend-bot} does the same in the other
+% direction when a column ends in the middle of a page, but the rule will
+% extend into the the bottom margin if the column goes to the end of the page.
+% 
+% Note that positive values for extending the rules should be used with
+% caution, only in situations where you need a special effect for one column
+% (see section \ref{sec:patterns} for a way to limit the change to one or a
+% few columns) or a small \env{multicol} environment. Overprinting and other
+% bizarre effects can result from extending the rule in the wrong place.
+% Negative values for both keys may be more generally useful, as they have the
+% effect of shrinking the rule. This behavior is illustrated with the rule for
+% this section.
 %
-% The \kvdesc{extend-fill} key is a boolean option that, when set to true, will
-% extend the rule to occupy any space between the bottom of the columns and the
-% end of the text area. Providing the key with no value is equivalent to
-% |extend-fill=true|. This option has no effect unless the \pkg{multicol}
-% package is loaded.
+% The \kvdesc{expand} and \kvdesc{shift} keys provide shorthands for two
+% common situations. You can use \kvdesc{expand} to set the same value for
+% \kvdesc{extend-top} and \kvdesc{extend-bot} For example, |expand=-16pt| is
+% equivalent to |extend-bot=-16pt, extend-top=-16pt|. The \kvdesc{shift} key
+% moves the rule downward for positive values and upward for negative ones
+% without changing the overall length of the rule. More precisely, |shift=x|
+% translates to |extend-bot=x, extend-top=-x|. For example, |shift=16pt| is
+% equivalent to |extend-bot=16pt, extend-top=-16pt|.
+%\end{multicols}
 %
-% If you want text below the \env{multicols} environment when using
-% \kvdesc{extend-fill}, you can reserve space for it with
-% \kvdesc{extend-reserve}, which takes a dimension expression specifying the
-% vertical space to leave available after the rule. If the value is greater
+%\begin{multicols}{2}
+% \SetMCRule{line-style=solid,extend-fill}
+% The\stydsc{line-style=solid, extend-fill} \kvdesc{extend-fill} key is a
+% boolean option that, when set to true, will extend the rule to occupy any
+% space between the bottom of the columns and the end of the text area.
+% Providing the key with no value is equivalent to |extend-fill=true|. This
+% option is only relevant for the \env{multicols} environment. It will have
+% no effect with either \env{multicols*} or the plain \LaTeX{} two-column mode.
+%
+% If you want text below and on the same page as the \env{multicols}
+% environment when using \kvdesc{extend-fill}, you can reserve space for it
+% with \kvdesc{extend-reserve}, which takes a dimension expression specifying
+% the vertical space to leave available after the rule. If the value is greater
 % than zero, the height of the extended line will be reduced by the reserved
 % amount plus the value of \cs{multicolsep}. In other words, you only have to
 % specify the actual space you need for the text itself, not the space that 
@@ -717,54 +745,60 @@ and the derived files           multicolrule.ins,
 % probably will find this material spilling onto the next page anyway.
 %\end{multicols}
 %
-%\subsection{Rule Patterns}
+%\subsection{Rule Patterns}\label{sec:patterns}
 % \begin{syntax}
-  % |\DeclareMCRulePattern| \marg{name} \marg{key-value list}
-  % \end{syntax}
+% |\DeclareMCRulePattern| \marg{name} \marg{key-value list}
+% \end{syntax}
 %\DeclareMCRulePattern{left-hand}{custom-tile={\HandLeft}{8pt}{8pt}}
 %\DeclareMCRulePattern{right-hand}{custom-tile={\HandRight}{8pt}{8pt}}
 %\begin{multicols}{3}
 % \noindent \DescribeMacro{\DeclareMCRulePattern}
 % \SetMCRule{patterns={right-hand,left-hand}}
 % A\stydsc{patterns=\{right-hand, left-hand\}\\ See the code sample below for
-% the definitions of the patterns} ``pattern'' refers to a bundle of settings used by \mcrule. You can declare
-% a pattern for a line style with the command \cs{DeclareMCRulePattern}. The
-% \meta{name} should consist of letters and hyphens only. The
-% \meta{key-value list} can contain all keys that are valid for \cs{SetMCRule}
-% with the exception of \kvdesc{patterns}. If you put something like
-% |patterns=foo| in the definition of a pattern, you won't get an error, but it
-% will be ignored.
+% the definitions of the patterns} \emph{pattern} refers to a bundle of
+% settings used by \mcrule. Although you can use patterns as a shortcut to save
+% you a little typing, their main purpose is to let you to alter individual
+% rules within a multicol environment. For example, if you have three-column
+% text, you can make the left rule different from the right one. In two-column
+% text, you can have different rules for alternating pages.
+%
+% You declare a pattern for a line style with the command
+% \cs{DeclareMCRulePattern}. The \meta{name} should consist of letters and
+% hyphens only. The \meta{key-value list} can contain all keys that are valid
+% for \cs{SetMCRule} with the exception of \kvdesc{patterns}, which is filtered
+% out. In other words, if you put something like |patterns=foo| in the
+% pattern definition, it will be ignored.
 %
 % Once you have declared a pattern, you can use it as a value for the
 % \kvdesc{patterns} argument of \cs{SetMCRule}. This key can accept either a
 % single pattern or a comma-separated list of patterns. If you use a
 % comma-separated list, make sure you enclose it in braces.
 %
-% When a pattern is in effect, its settings are applied on top of whatever
-% the prior settings are. If you set the key to an empty list, any patterns
-% currently in effect will be canceled, and \mcrule{} will revert to the
-% previous settings.
+% When a pattern is in effect, its settings are applied on top of the prior
+% settings. If you set the key to an empty list, any patterns currently in
+% effect will be canceled, and \mcrule{} will revert to the previous settings.
 %
 % If the \kvdesc{patterns} key contains more than one pattern, \mcrule{} will
 % cycle through the list of patterns, using one pattern each time a rule is
-% drawn between columns. (Note, the patterns do not cycle within a single
-% column separator if you use the \kvdesc{repeat} key.) This cycle is global,
-% so if the number columns is not a multiple of the number of patterns and you
-% start a new \env{multicols} environment with the same patterns in effect, the
-% cycle will pick up where it left off. Every time you set new patternss,
-% however, the cycle begins anew.
-%
+% drawn between columns. Note that the patterns do not cycle within a single
+% column separator if you use the \kvdesc{repeat} key. This cycle is global,
+% so if the number column separators is not a multiple of the number of
+% patterns and you start a new \env{multicols} environment with the same
+% patterns in effect, the cycle will pick up where it left off. Every time you
+% set new patterns, however, the cycle begins anew with the first pattern in
+% the list.
 %\end{multicols}
 %
 % The columns above were defined with the following:
-%\begin{verbatim}
+%
+% \begin{BVerbatim}
 % \DeclareMCRulePattern{left-hand}{custom-tile={\HandLeft}{8pt}{8pt}}
 % \DeclareMCRulePattern{right-hand}{custom-tile={\HandRight}{8pt}{8pt}}
 % \begin{multicols}{3}
 %   \SetMCRule{patterns={right-hand,left-hand}}
 %   ...
 % \end{multicols}
-%\end{verbatim}
+% \end{BVerbatim}
 %
 %\DeclareMCRulePattern{shrink-me}{line-style=solid,extend-top=-3\baselineskip}
 %\begin{multicols}{3}
@@ -789,7 +823,7 @@ and the derived files           multicolrule.ins,
 % For example, suppose you have four-column text and want to alter the third
 % column separator on the first page of the environment only.\footnote{Remember
 % that you have one less column separator than you have columns.} You could
-% accomplish this task with the code above.
+% accomplish this task with the code below.
 %
 % Using predefined patterns adds processing overhead, since they must be
 % applied each time the rule is drawn. Therefore it is more efficient to avoid
@@ -798,20 +832,22 @@ and the derived files           multicolrule.ins,
 % unlikely to notice too much delay.
 %
 % Note that any settings you provide in the same command where you apply a 
-% \kvdesc{patterns} key do not alter definition of the pattern. If you do this,
-% you are altering the settings in effect before the pattern is applied.
+% \kvdesc{patterns} key do not alter definition of the pattern, even if they
+% come after the \kvdesc{patterns} key. Such settings will take effect before
+% the pattern is applied and will reappear after the pattern ends, if it does.
 %
 %\end{multicols}
-
+%
 % Shrinking the final two column separators in four-column text:
-%\begin{verbatim}
+%
+%\begin{BVerbatim}
 % \DeclareMCRulePattern{shrink-me}{line-style=solid,
 %    extend-top=-3\baselineskip}
 % \begin{multicols}{4}
 %   \SetMCRule{patterns=shrink-me,pattern-after=1,pattern-for=2}
 %   ...
 % \end{multicols}
-%\end{verbatim}
+%\end{BVerbatim}
 %
 %\end{documentation}
 %
@@ -830,7 +866,7 @@ and the derived files           multicolrule.ins,
 %\subsection{Preliminaries}
 %
 %    \begin{macrocode}
-\ProvidesExplPackage {multicolrule} {2019/01/01} {1.2}
+\ProvidesExplPackage {multicolrule} {2019/02/12} {1.2a}
   {Decorative vertical rules between columns}
 %    \end{macrocode}
 %
@@ -932,15 +968,38 @@ and the derived files           multicolrule.ins,
 \ProcessKeysOptions{mcrule-opts}
 %    \end{macrocode}
 %
-% \subsection{Patching Output Routines}
+% \subsection{Patching Output Routines}\label{sec:patching}
 %
-%\begin{function}{\@@_column_height:,\@@_column_depth:}
+%\begin{function}{\@@_column_height:}
 %
-% Get the height and depth of the box appropriate to the supported mode.
+% Returns the fixed height of the columns. The actual code to calculate the
+% height is set when we set the appropriate mode.
 %
 %    \begin{macrocode}
 \cs_new:Npn \@@_column_height: {}
+%    \end{macrocode}
+%\end{function}
+%
+%\begin{function}{\@@_column_depth:}
+%
+% Returns the maximum depth the columns. The actual code to calculate the
+% depth is set when we set the appropriate mode.
+%
+%    \begin{macrocode}
 \cs_new:Npn \@@_column_depth: {}
+%    \end{macrocode}
+%\end{function}
+%
+%\begin{function}{\@@_column_overflow:}
+%
+% Returns the amount by which text overflows the bottom of the columns. This
+% situation occurs in \pkg{multicol} when \cs{maxbalancingoverflow} is greater
+% than 0 (by default it's 12pt) and there would otherwise be a widow at the end
+% of the environment, so we don't check for it in two-column mode.
+% \changes{v1.2a}{2019/2/12}{New internal function}
+%
+%    \begin{macrocode}
+\cs_new:Npn \@@_column_overflow: {0pt}
 %    \end{macrocode}
 %\end{function}
 %
@@ -1022,14 +1081,48 @@ and the derived files           multicolrule.ins,
   \@@_patch_mcol_output:N \RL@column@boxes
 %    \end{macrocode}
 %
-% Although taking the height of \cmd{\mult@rightbox} is a reliable way
-% to get the column height, the same isn't true for the depth, so we
-% use |\dimen\tw@|, which \pkg{multicol} uses to hold the maximum
-% depth of all the columns, instead.
+% In LTR mode, we are invoked after a column has been typeset, which destroys
+% their boxes in the process. So the only boxes we can be sure still exist are
+% \cmd{\mult@rightbox}, which will be set to column height as all the others,
+% and \cmd{\mult@nat@firstbox}, which contains the first column at its
+% natural height.
 %
 %    \begin{macrocode}
-  \cs_gset:Npn \@@_column_height: {\box_ht:N \mult@rightbox}
-  \cs_gset:Npn \@@_column_depth: {\dimen\tw@}
+  \cs_gset:Npn \@@_column_height:
+  {
+    \box_ht:N \mult@rightbox 
+  }
+%    \end{macrocode}
+%
+% Since the depth can differ from column to column, we use |\dimen\tw@|,
+% which \pkg{multicol} uses to hold the maximum depth of all the columns
+% already typeset, but as it won't have reached the final one yet, we check
+% that too. This could lead to an inconsistent height in the event that
+% there are 3 or more columns and a middle column has a significantly larger
+% depth than either the previous columns or the last column, but for now it
+% does not seem worth accounting for a condition that is likely to be very
+% rare in actual user documents.
+% \changes{v1.2a}{2019/2/12}{Check depth of final column}
+%
+%    \begin{macrocode}
+  \cs_gset:Npn \@@_column_depth:
+  {
+    \dim_max:nn {\dimen\tw@}{\box_dp:N \mult@rightbox}
+  }
+%    \end{macrocode}
+%
+% To avoid widows, \pkg{multicol} allows some overflow, by default up to 12pt,
+% and so it's possible that some text will overflow beyond the fixed bottom of
+% the column. In this case, our rule won't descend far enough. To correct, we
+% measure the column overflow as the difference between the natural height of
+% the first box and the height of the last column, and add that amount if it's
+% greater than 0pt.
+%
+%    \begin{macrocode}
+\cs_gset:Npn \@@_column_overflow:
+{
+  \dim_max:nn {\box_ht:N \mult@nat@firstbox - \box_ht:N \mult@rightbox}{0pt}
+}
 %    \end{macrocode}
 %
 % We need to reissue \cs{LRmulticolcolumns} to update the actual code in
@@ -1072,8 +1165,7 @@ and the derived files           multicolrule.ins,
 %
 %\begin{macro}{\mcruledivider}
 %
-% This is the function directly called by the patched output routines. It
-% has a \LaTeX2 name so the user can redefine it if necessary. Its main
+% This is the function directly called by the patched output routines. Its main
 % function is to call the internal function \cs{mcrule_divider:}, which contains
 % the actual rule-typesetting instructions, the number of times specified in
 % \cs{l_@@_repeat_int}.  \pkg{multicol} puts the rule in a group
@@ -1110,7 +1202,8 @@ and the derived files           multicolrule.ins,
       {
         \int_gset:Nn \g_@@_pattern_count_int {\c_one_int}
       }
-      \tl_set:Nx \l_tmpa_tl {\seq_item:Nn \l_@@_pattern_list_seq {\g_@@_pattern_count_int} }
+      \tl_set:Nx \l_tmpa_tl {\seq_item:Nn \l_@@_pattern_list_seq
+        {\g_@@_pattern_count_int} }
       \tl_if_blank:VF \l_tmpa_tl
       {
         \@@_set_pattern:V \l_tmpa_tl
@@ -1147,15 +1240,18 @@ and the derived files           multicolrule.ins,
 %
 %\begin{function}{\@@_column_total_height:,\@@_column_total_depth:}
 % Get column height and depth with any explicit alterations.
+% \changes{v1.2a}{2019/2/12}{Account for overflow text}
+% 
 %    \begin{macrocode}
 \cs_new:Npn \@@_column_total_height:
 {
   \dim_eval:n {\@@_column_height: + \@@_column_depth: + 
-    \@@_extend_column_top: + \@@_extend_column_bottom:}
+    \@@_extend_column_top: + \@@_column_overflow: + \@@_extend_column_bottom:}
 }
 \cs_new:Npn \@@_column_total_depth:
 {
-  \dim_eval:n {\@@_column_depth: + \@@_extend_column_bottom:}
+  \dim_eval:n {\@@_column_depth: + \@@_column_overflow: +
+    \@@_extend_column_bottom:}
 }
 %    \end{macrocode}
 %\end{function}
@@ -1477,6 +1573,7 @@ and the derived files           multicolrule.ins,
 %   extend-reserve keys}
 % \changes{v1.2}{2019/1/1}{Added patterns, pattern-after, and pattern-for
 %   keys}
+% \changes{v1.2a}{2019/2/12}{Added expand and shift shortcuts}
 %
 %    \begin{macrocode}
 \keys_define:nn {mcrule}
@@ -1486,6 +1583,14 @@ and the derived files           multicolrule.ins,
   extend-fill                      .bool_set:N = \l_@@_extend_fill_bool,
   extend-fill                      .default:n = true,
   extend-reserve                   .dim_set:N  = \l_@@_extend_reserve_dim,
+  expand                           .code:n = {    
+    \dim_set:Nn \l_@@_extend_bot_dim {#1}
+    \dim_set:Nn \l_@@_extend_top_dim {#1}
+  },
+  shift                            .code:n = {    
+    \dim_set:Nn \l_@@_extend_bot_dim {#1}
+    \dim_set:Nn \l_@@_extend_top_dim {\fp_to_dim:n {-1 * \l_@@_extend_bot_dim}}
+  },
   line-style                       .choice:,
   line-style / default             .code:n = \cs_set:Npn \mcrule_divider: 
     {\vrule\@width\columnseprule},

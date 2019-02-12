@@ -7,12 +7,13 @@
 \usepackage{bbding}
 \usepackage{pgfornament}
 \usepackage{bidi}
+\usetikzlibrary{calc}
 \setlength{\columnsep}{24pt}
 \setlength{\columnseprule}{.5pt}
 \begin{document}
 
 \section*{Style Gallery}
-This file gives brief examples covering all the defined line styles and
+This file gives brief examples covering all defined line styles and
 other functions available in \texttt{multicolrule}. See the documentation
 for instructions on how to set them in your own documents.
 
@@ -157,13 +158,22 @@ for instructions on how to set them in your own documents.
   \lipsum[1-2]
 \end{multicols}
 
-\setlength{\columnsep}{50pt}
-\begin{multicols}{2}[Custom Line (color gray, 4 repeats), just because we can]
+\begin{multicols}{2}[Custom line that is too wide for the separator]
   \SetMCRule{color=gray,repeat=4,repeat-distance=4pt,width=1pt,custom-line={\path (TOP) to [ornament=88] (BOT);}}
   \lipsum[1-2]
 \end{multicols}
 
-\newpage
+\begin{multicols}{2}[Custom line with horizontal lines flush with vertical rule]
+  \SetMCRule{color=gray,width=0.4pt, expand=2pt, custom-line={
+      \coordinate (TOPLEFT) at ($(TOP)-(\columnwidth+.5\columnsep,\columnseprule)$);
+      \coordinate (TOPRIGHT) at ($(TOP)+(\columnwidth+.5\columnsep,-\columnseprule)$);
+      \coordinate (BOTLEFT) at ($(BOT)-(\columnwidth+.5\columnsep,-\columnseprule)$);
+      \coordinate (BOTRIGHT) at ($(BOT)+(\columnwidth+.5\columnsep,\columnseprule)$);
+      \draw[line width=\columnseprule] (TOPLEFT) -- (TOPRIGHT)
+      (TOP) -- (BOT) (BOTLEFT) -- (BOTRIGHT);}}
+  \lipsum[1-2]
+\end{multicols}
+
 \subsection*{Extended Rules}
 \setlength{\columnsep}{24pt}
 
@@ -177,14 +187,24 @@ for instructions on how to set them in your own documents.
   \lipsum[1]
 \end{multicols}
 
-\begin{multicols}{2}[Dashed -- shrink both 16pt]
-  \SetMCRule{line-style=dashed,extend-top=-16pt,extend-bot=-16pt}
+\begin{multicols}{2}[Dashed -- expand -8pt]
+  \SetMCRule{line-style=dashed,expand=-8pt}
   \lipsum[1]
 \end{multicols}
 
-\begin{multicols}{2}[Extend-Fill with extend-reserve]
+\begin{multicols}{2}[Dots -- expand 8pt]
+  \SetMCRule{line-style=dots,expand=8pt}
+  \lipsum[1]
+\end{multicols}
+
+\begin{multicols}{2}[Dots -- shift 16pt]
+  \SetMCRule{line-style=dots,shift=16pt}
+  \lipsum[1-2]
+\end{multicols}
+
+\begin{multicols}{2}[Extend-fill with extend-reserve]
   \SetMCRule{line-style=solid,extend-fill,extend-reserve=\baselineskip}
-  \lipsum[1-5]
+  \lipsum[1-2]
 \end{multicols}
 And something at the end to show the reserved space
 
