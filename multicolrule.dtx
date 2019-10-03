@@ -181,6 +181,7 @@ and the derived files           multicolrule.ins,
 % \changes{v1.2}{2019/1/1}{Define rule patterns}
 % \changes{v1.2}{2019/1/1}{Allow per-column rule changes}
 % \changes{v1.2a}{2019/2/12}{Improve documentation}
+% \changes{v1.3}{2019/1/10}{Add strut rule}
 %
 %\begin{abstract}
 % The \mcrule{} package lets you customize the appearance of the vertical rule
@@ -227,9 +228,16 @@ and the derived files           multicolrule.ins,
 % \begin{multicols}{2}
 % \SetMCRule{custom-line={\path (TOP) to [ornament=85] (BOT);},extend-top=-24pt,
 %   extend-bot=-8pt}
-% \subsection*{New for Version 1.2}
+% \subsection*{New for Version 1.3}
 % Version\stydsc{custom-line=\\\{\textbackslash path (TOP) to [ornament=85]
-%   (BOT);\}, extend-top=-24pt, extend-bot=-8pt} 1.2 adds the ability to define
+% (BOT);\}, extend-top=-24pt, extend-bot=-8pt} 1.3 adds a strut rule. This
+% places an invisible rule (a strut) that obeys the other options for the rule.
+% Using a strut allows you to achieve effects such as selectively disabling one
+% separator within a pattern or using the extend and reserve options to control
+% the spacing to the text outside the \env{multicols} environment.
+%
+% \subsection*{New for Version 1.2}
+% Version 1.2 adds the ability to define
 % patterns, which are aliases for a series of \cs{SetMCRule} settings. With
 % patterns, you can change individual separators on the same page. For example,
 % in three-column text, the left separator can differ from the right.
@@ -502,6 +510,7 @@ and the derived files           multicolrule.ins,
 % \kvdesc{solid} & A solid line, like \kvdesc{default}, but supports extending
 % rules\\
 % \kvdesc{solid-circles} & A series of filled circles (\emph{tikz only})\\
+% \kvdesc{strut} & An invisible (0pt) strut is drawn in place of a solid rule.\\
 % \bottomrule
 % \end{longtable}
 %
@@ -530,6 +539,13 @@ and the derived files           multicolrule.ins,
 % The \kvdesc{dotted} styles differ from \kvdesc{dots} in that the former are
 % squares with side lengths equal to \cs{columnseprule}. This mirrors the
 % behavior of the equivalently named dotted patterns in \pkg{tikz}.
+%
+% The \kvdesc{strut} style draws a 0pt rule. Like every other line style,
+% however, the value of \cs{columnseprule} must be greater than 0pt for it
+% to be drawn. Since this rule will be invisible, it is only useful when used
+% in conjunction with the extend options. See section \ref{sec:extend}. With
+% one of those options, you can shift the vertical position of a
+% column even if you are not actually using visible rules. 
 % \end{multicols}
 %
 % \subsubsection{Custom Patterns}\label{sec:custom}
@@ -705,9 +721,9 @@ and the derived files           multicolrule.ins,
 % extend into the the bottom margin if the column goes to the end of the page.
 % 
 % Note that positive values for extending the rules should be used with
-% caution, only in situations where you need a special effect for one column
-% (see section \ref{sec:patterns} for a way to limit the change to one or a
-% few columns) or a small \env{multicol} environment. Overprinting and other
+% caution and only in situations where you need a special effect for one column
+% or a small \env{multicol} environment. (See section \ref{sec:patterns} for a
+% way to limit the change to one or a few columns.) Overprinting and other
 % bizarre effects can result from extending the rule in the wrong place.
 % Negative values for both keys may be more generally useful, as they have the
 % effect of shrinking the rule. This behavior is illustrated with the rule for
@@ -838,7 +854,7 @@ and the derived files           multicolrule.ins,
 %
 %\end{multicols}
 %
-% Shrinking the final two column separators in four-column text:
+% \noindent Shrinking the final two column separators in four-column text:
 %
 %\begin{BVerbatim}
 % \DeclareMCRulePattern{shrink-me}{line-style=solid,
@@ -866,7 +882,7 @@ and the derived files           multicolrule.ins,
 %\subsection{Preliminaries}
 %
 %    \begin{macrocode}
-\ProvidesExplPackage {multicolrule} {2019/02/12} {1.2a}
+\ProvidesExplPackage {multicolrule} {2019/10/01} {1.3}
   {Decorative vertical rules between columns}
 %    \end{macrocode}
 %
@@ -982,7 +998,7 @@ and the derived files           multicolrule.ins,
 %
 %\begin{function}{\@@_column_depth:}
 %
-% Returns the maximum depth the columns. The actual code to calculate the
+% Returns the maximum depth of the columns. The actual code to calculate the
 % depth is set when we set the appropriate mode.
 %
 %    \begin{macrocode}
@@ -1083,8 +1099,8 @@ and the derived files           multicolrule.ins,
 %
 % In LTR mode, we are invoked after a column has been typeset, which destroys
 % their boxes in the process. So the only boxes we can be sure still exist are
-% \cmd{\mult@rightbox}, which will be set to column height as all the others,
-% and \cmd{\mult@nat@firstbox}, which contains the first column at its
+% \cmd{\mult@rightbox}, which will be set to the same column height as all the
+% others, and \cmd{\mult@nat@firstbox}, which contains the first column at its
 % natural height.
 %
 %    \begin{macrocode}
@@ -1323,7 +1339,7 @@ and the derived files           multicolrule.ins,
 % box that is the height of the current column. The pattern must be
 % something that can go in a horizontal box. The \meta{space above} and
 % \meta{space below} arguments must be dimension expressions.
-% \changes{1.2a}{2018/01/02}{Allow evaluated dimensions for kerns}
+% \changes{1.2a}{2018/1/2}{Allow evaluated dimensions for kerns}
 %    \begin{macrocode}
 \cs_new_nopar:Npn \@@_pattern:nnn #1#2#3
 {
@@ -1350,7 +1366,7 @@ and the derived files           multicolrule.ins,
 % that is the height of the current column. The pattern must be something
 % that can go in a horizontal box. The \meta{space above} and
 % \meta{space below} arguments must be dimension expressions.
-% \changes{1.2a}{2018/01/02}{Allow evaluated dimensions for kerns}
+% \changes{1.2a}{2018/1/2}{Allow evaluated dimensions for kerns}
 %    \begin{macrocode}
 \cs_new_nopar:Npn \@@_tile_pattern:nnn #1#2#3
 {
@@ -1402,6 +1418,17 @@ and the derived files           multicolrule.ins,
 \cs_new:Npn \@@_solid_line:
 {
   \rule[-\@@_column_total_depth:]{\columnseprule}{\@@_column_total_height:}
+}
+%    \end{macrocode}
+%\end{function}
+%
+%\begin{function}{\@@_strut:}
+% Uses a zero-width rule, regardless of the actual value of \cs{columnseprule}.
+% \changes{1.3}{2019/10/1}{New function}
+%    \begin{macrocode}
+\cs_new:Npn \@@_strut:
+{
+  \rule[-\@@_column_total_depth:]{0pt}{\@@_column_total_height:}
 }
 %    \end{macrocode}
 %\end{function}
@@ -1596,6 +1623,8 @@ and the derived files           multicolrule.ins,
     {\vrule\@width\columnseprule},
   line-style / solid               .code:n = \cs_set:Npn \mcrule_divider: 
     {\@@_solid_line:},
+  line-style / strut               .code:n = \cs_set:Npn \mcrule_divider: 
+    {\@@_strut:},
   line-style / dots                .code:n = \cs_set:Npn \mcrule_divider:
     {\@@_tile_pattern:nnn {.}{1pt}{1pt}},
   line-style / dense-dots          .code:n = \cs_set:Npn \mcrule_divider: 

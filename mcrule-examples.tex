@@ -4,6 +4,7 @@
 \usepackage{fontspec}
 \usepackage[tikz]{multicolrule}[2019/01/01]
 \usepackage{lipsum}
+\usepackage{fancyvrb}
 \usepackage{bbding}
 \usepackage{pgfornament}
 \usepackage{bidi}
@@ -206,7 +207,13 @@ for instructions on how to set them in your own documents.
   \SetMCRule{line-style=solid,extend-fill,extend-reserve=\baselineskip}
   \lipsum[1-2]
 \end{multicols}
-And something at the end to show the reserved space
+And something at the end to show the reserved space.
+
+\begin{multicols}{2}[Strut with extend-fill + extend-reserve]
+  \SetMCRule{line-style=strut,extend-fill,extend-reserve=\baselineskip}
+  \lipsum[1-3]
+\end{multicols}
+This text is here to show the effect of the strut used as a separator above. 
 
 \subsection*{Patterns}
 
@@ -214,7 +221,7 @@ And something at the end to show the reserved space
 \DeclareMCRulePattern{right-hand}{custom-tile={\HandRight}{8pt}{8pt}}
 \DeclareMCRulePattern{shrinking}{line-style=solid,color=blue,extend-top=-16pt}
 \begin{multicols}{3}[Alternating Patterns]
-  \SetMCRule{patterns={right-hand,left-hand}}
+  \SetMCRule{patterns={left-hand,right-hand}}
   \lipsum[1-3]
 \end{multicols}
 
@@ -245,6 +252,12 @@ And something at the end to show the reserved space
   \lipsum[1-2]
 \end{multicols}
 
+\DeclareMCRulePattern{invisible}{width=thin,line-style=strut}
+\SetMCRule{patterns={left-hand,invisible,right-hand}}
+\begin{multicols}{4}[Invisible middle divider with strut]
+  \raggedcolumns
+  \lipsum[1-2]
+\end{multicols}
 
 \DeclareMCRulePattern{blue-double}{width=thick,line-style=solid,color=blue,double=3pt}
 \DeclareMCRulePattern{orange-triple}{width=thick,line-style=solid,color=orange,triple=3pt}
