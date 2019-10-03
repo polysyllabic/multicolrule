@@ -181,7 +181,6 @@ and the derived files           multicolrule.ins,
 % \changes{v1.2}{2019/1/1}{Define rule patterns}
 % \changes{v1.2}{2019/1/1}{Allow per-column rule changes}
 % \changes{v1.2a}{2019/2/12}{Improve documentation}
-% \changes{v1.3}{2019/1/10}{Add strut rule}
 %
 %\begin{abstract}
 % The \mcrule{} package lets you customize the appearance of the vertical rule
@@ -359,7 +358,11 @@ and the derived files           multicolrule.ins,
 % \end{multicols}
 %
 % \section{The User Interface}
-% |\SetMCRule| \marg{key-value list}
+% \begin{function}{\SetMCRule}
+% \begin{syntax}
+% \cs{SetMCRule} \meta{key-value list}
+% \end{syntax}
+% \end{function}
 %
 % \begin{multicols}{2}
 % \SetMCRule{width=2pt,line-style=circles}
@@ -542,10 +545,9 @@ and the derived files           multicolrule.ins,
 %
 % The \kvdesc{strut} style draws a 0pt rule. Like every other line style,
 % however, the value of \cs{columnseprule} must be greater than 0pt for it
-% to be drawn. Since this rule will be invisible, it is only useful when used
-% in conjunction with the extend options. See section \ref{sec:extend}. With
-% one of those options, you can shift the vertical position of a
-% column even if you are not actually using visible rules. 
+% to be drawn. An invisible rule can be useful if you want to disable a rule
+% in the middle of a cycle of patterns or in conjunction with the extend
+% various extend options. See section \ref{sec:extend}.
 % \end{multicols}
 %
 % \subsubsection{Custom Patterns}\label{sec:custom}
@@ -655,8 +657,9 @@ and the derived files           multicolrule.ins,
 % \SetMCRule{width=thick,line-style=dash-dot-dot}
 % You\stydsc{line-style= dash-dot-dot,\\ width=thick} can set the width of the
 % rule with the \kvdesc{width} key. Legal values are any explicit dimension or
-% dimension expression, as well as with names that parallel those used by
-% \pkg{tikz}, except that spaces in the key names are replaced with hyphens.
+% dimension expression, as well as one of the names listed in table
+% \ref{table:linewidths}. These names parallel those used by \pkg{tikz}, except
+% that spaces in the key names are replaced with hyphens.
 %  
 % The current width of the rule is kept in \cs{columnseprule}, just as in
 % vanilla \LaTeX, and if it is set separately, the custom rule's width will
@@ -762,9 +765,11 @@ and the derived files           multicolrule.ins,
 %\end{multicols}
 %
 %\subsection{Rule Patterns}\label{sec:patterns}
+% \begin{function}{\DeclareMCRulePattern}
 % \begin{syntax}
-% |\DeclareMCRulePattern| \marg{name} \marg{key-value list}
+% \cs{DeclareMCRulePattern} \marg{name} \marg{key-value list}
 % \end{syntax}
+% \end{function}
 %\DeclareMCRulePattern{left-hand}{custom-tile={\HandLeft}{8pt}{8pt}}
 %\DeclareMCRulePattern{right-hand}{custom-tile={\HandRight}{8pt}{8pt}}
 %\begin{multicols}{3}
@@ -805,7 +810,9 @@ and the derived files           multicolrule.ins,
 % the list.
 %\end{multicols}
 %
-% The columns above were defined with the following:
+% \noindent The columns above were defined with the following commands:
+%
+% \medskip
 %
 % \begin{BVerbatim}
 % \DeclareMCRulePattern{left-hand}{custom-tile={\HandLeft}{8pt}{8pt}}
@@ -855,6 +862,8 @@ and the derived files           multicolrule.ins,
 %\end{multicols}
 %
 % \noindent Shrinking the final two column separators in four-column text:
+%
+% \medskip
 %
 %\begin{BVerbatim}
 % \DeclareMCRulePattern{shrink-me}{line-style=solid,
@@ -985,29 +994,33 @@ and the derived files           multicolrule.ins,
 %    \end{macrocode}
 %
 % \subsection{Patching Output Routines}\label{sec:patching}
+% Now that we know what mode we're going to run in, we patch the output
+% routine(s) to substitute our custom rule for the vanilla one. Since
+% \pkg{multicol} doesn't fully support twocolumn mode, we patch one or the
+% other, but not both. 
 %
-%\begin{function}{\@@_column_height:}
+% First we set some stubs for functions we'll need to redirect depending on
+% the mode we're operating in.
 %
+%\begin{macro}{\@@_column_height:}
 % Returns the fixed height of the columns. The actual code to calculate the
 % height is set when we set the appropriate mode.
 %
 %    \begin{macrocode}
 \cs_new:Npn \@@_column_height: {}
 %    \end{macrocode}
-%\end{function}
+%\end{macro}
 %
-%\begin{function}{\@@_column_depth:}
-%
+%\begin{macro}{\@@_column_depth:}
 % Returns the maximum depth of the columns. The actual code to calculate the
 % depth is set when we set the appropriate mode.
 %
 %    \begin{macrocode}
 \cs_new:Npn \@@_column_depth: {}
 %    \end{macrocode}
-%\end{function}
+%\end{macro}
 %
-%\begin{function}{\@@_column_overflow:}
-%
+%\begin{macro}{\@@_column_overflow:}
 % Returns the amount by which text overflows the bottom of the columns. This
 % situation occurs in \pkg{multicol} when \cs{maxbalancingoverflow} is greater
 % than 0 (by default it's 12pt) and there would otherwise be a widow at the end
@@ -1017,13 +1030,13 @@ and the derived files           multicolrule.ins,
 %    \begin{macrocode}
 \cs_new:Npn \@@_column_overflow: {0pt}
 %    \end{macrocode}
-%\end{function}
+%\end{macro}
 %
-%\begin{function}{\@@_patch_mcol_output:N}
-% Now that we know what mode we're going to run in, we patch the output
-% routine(s) to substitute our custom rule for the vanilla one. Since
-% \pkg{multicol} doesn't fully support twocolumn mode, we patch one or the
-% other, but not both. As of version 1.2, we make \cs{columnseprulecolor}
+%\begin{macro}{\@@_patch_mcol_output:N}
+% We create a helper macro to simplify patching the appropriate part of the
+% relevant \pkg{multicol} routines. The search and replace texts are identical
+% across several routines, so only the name of the function to be patched
+% needs to be passed as a parameter. We make \cs{columnseprulecolor}
 % part of \cs{mcruledivider} so that we can set the color as part of a
 % style pattern.
 % \changes{v1.2}{2019/1/1}{Move \cs{columnseprulecolor} inside
@@ -1037,9 +1050,9 @@ and the derived files           multicolrule.ins,
   {\msg_info:nnn {multicolrule} {patch-failure} {#1}}
 }
 %    \end{macrocode}
-%\end{function}
+%\end{macro}
 %
-%\begin{function}{\@@_patch_twocol_output:N}
+%\begin{macro}{\@@_patch_twocol_output:N}
 % The same idea as above, only for the vanilla twocolumn mode.
 % \changes{v1.2}{2019/1/1}{Move \cs{columnseprulecolor} inside
 %   \cs{mcruledivider}}
@@ -1052,7 +1065,9 @@ and the derived files           multicolrule.ins,
   {\msg_info:nnn {multicolrule} {patch-failure} {#1}}
 }
 %    \end{macrocode}
-%\end{function}
+%\end{macro}
+%
+% Now the actual patching begins.
 %
 %    \begin{macrocode}
 \bool_if:NTF \g_@@_twocolumn_bool
@@ -1060,15 +1075,23 @@ and the derived files           multicolrule.ins,
   \@ifpackageloaded{multicol}
   {\msg_warning:nn {multicolrule} {multicol-loaded}}{}
 %    \end{macrocode}
-% Provide the column-color macro from \pkg{multicol}.
+%
+% Default \LaTeX{} lacks \cs{columnseprulecolor}, so if we're in two-column
+% mode, we provide it here.
+%
 %    \begin{macrocode}
   \cs_gset:Npn \columnseprulecolor {\normalcolor}
-  \cs_gset:Npn \@@_column_height: {\box_ht:N \@outputbox}
-  \cs_gset:Npn \@@_column_depth: {\box_dp:N \@outputbox}
-  \@@_patch_twocol_output:N \@outputdblcol
 %    \end{macrocode}
 %
-% Now patch the relevant code in |\@outputdblcol|, replacing the hard-coded
+% In vanilla twocolumn mode, the column height and depth can be taken directly
+% from \cmd{\@outputbox}.
+%
+%    \begin{macrocode}
+  \cs_gset:Npn \@@_column_height: {\box_ht:N \@outputbox}
+  \cs_gset:Npn \@@_column_depth: {\box_dp:N \@outputbox}
+%    \end{macrocode}
+%
+% Now patch the relevant code in \cmd{\@outputdblcol}, replacing the hard-coded
 % rule with a macro that we can overwrite.
 %
 %    \begin{macrocode}
@@ -1079,6 +1102,7 @@ and the derived files           multicolrule.ins,
 % after \pkg{xcolor}, \pkg{tikz}, \emph{and} \pkg{multicol}, so it must always
 % be loaded after us. We use \cs{AfterPackage} from \pkg{scrlfile} to insert
 % the patch if \pkg{bidi} is loaded later on.
+%
 %    \begin{macrocode}
   \AfterPackage!{bidi}
   {
@@ -1154,9 +1178,8 @@ and the derived files           multicolrule.ins,
 % columns in right-to-left order, and the effect is to leave the original
 % \pkg{multicol} definitions loaded but unused. As a result, after these
 % changes, the \pkg{multicol} commands \cs{LRmulticolcolumns} and
-% \cs{RLmulticolcolumns} have no visible effect. But as \pkg{bidi} also
-% reworks the footnotes extensively, it's easier just to patch the equivalent
-% output routines rather than rewrite it properly.
+% \cs{RLmulticolcolumns} have no visible effect. First we replace
+% \pkg{bidi}'s copies of the column boxes routines with our patched version.
 %
 %    \begin{macrocode}
   \AfterPackage!{bidi}
@@ -1174,27 +1197,24 @@ and the derived files           multicolrule.ins,
   }
 }
 %    \end{macrocode}
-% 
 %
 % \subsection{Creating the Rules}
-% Utility functions for different rule types
+% Now we declare utility functions for different rule types.
 %
-%\begin{macro}{\mcruledivider}
-%
+%\begin{function}{\mcruledivider}
 % This is the function directly called by the patched output routines. Its main
-% function is to call the internal function \cs{mcrule_divider:}, which contains
+% purpose is to call the internal function \cs{mcrule_divider:}, which contains
 % the actual rule-typesetting instructions, the number of times specified in
-% \cs{l_@@_repeat_int}.  \pkg{multicol} puts the rule in a group
-% in order to keep the color contained, which means that any local changes
-% here will be lost at the end of the rule. For this reason, we must set the
-% pattern, if any, here in order to support having different line styles
-% between different columns.
+% \cs{l_@@_repeat_int}. \pkg{multicol} puts the rule in a group in order to keep
+% the color contained, which means that any local changes here will be lost at
+% the end of the rule. For this reason, we must set the pattern, if any, here in
+% order to support having different line styles between different columns.
 %
-% \changes{v1.2}{2019/1/1}{Add pattern support}
 %    \begin{macrocode}
 \cs_new_protected:Npn \mcruledivider
 {
 %    \end{macrocode}
+% \changes{v1.2}{2019/1/1}{Add pattern support}
 % If the |pattern-after| counter is set, wait that many iterations of the rule
 % before we apply the patterns.
 %    \begin{macrocode}
@@ -1204,9 +1224,11 @@ and the derived files           multicolrule.ins,
   }
   {
 %    \end{macrocode}
+%
 % Don't change if the pattern is empty or the |pattern-for| counter has
 % expired. The way the logic works here, negative values of |pattern-for|
 % result in an indefinite number of repeats.
+%
 %    \begin{macrocode}
     \bool_lazy_and:nnT
     {\int_compare_p:nNn {\seq_count:N \l_@@_pattern_list_seq} > {\c_zero_int}}
@@ -1231,13 +1253,17 @@ and the derived files           multicolrule.ins,
     }
   }
 %    \end{macrocode}
+%
 % Now that the pattern has been changed we can set the color.
+%
 %    \begin{macrocode}
   \columnseprulecolor
 %    \end{macrocode}
+%
 % We only call \cs{mcrule_divider:} if \cs{columnseprule} $>0$, so that all
 % line styles can be turned off by setting it to 0, just as is the case with
 % the vanilla rules.
+%
 %    \begin{macrocode}
   \bool_lazy_and:nnT
   {\dim_compare_p:nNn {\columnseprule} > {\c_zero_dim}}
@@ -1252,9 +1278,9 @@ and the derived files           multicolrule.ins,
   }
 }
 %    \end{macrocode}
-%\end{macro}
+%\end{function}
 %
-%\begin{function}{\@@_column_total_height:,\@@_column_total_depth:}
+%\begin{macro}{\@@_column_total_height:,\@@_column_total_depth:}
 % Get column height and depth with any explicit alterations.
 % \changes{v1.2a}{2019/2/12}{Account for overflow text}
 % 
@@ -1270,9 +1296,9 @@ and the derived files           multicolrule.ins,
     \@@_extend_column_bottom:}
 }
 %    \end{macrocode}
-%\end{function}
+%\end{macro}
 %
-%\begin{function}{\@@_extend_column_top:}
+%\begin{macro}{\@@_extend_column_top:}
 % Currently, the extend amount for the top is just the 
 % |\l_@@_extend_top_dim| distance. In the future we may allow more complex
 % criteria, such as by odd or even page, or on a particular page. Although
@@ -1284,9 +1310,9 @@ and the derived files           multicolrule.ins,
   \l_@@_extend_top_dim
 }
 %    \end{macrocode}
-%\end{function}
+%\end{macro}
 %
-%\begin{function}{\@@_extend_column_bottom:}
+%\begin{macro}{\@@_extend_column_bottom:}
 % The |extend-fill| option, which is only applicable with \pkg{multicol},
 % extends the rule from the bottom of the column to the end of the text area,
 % minus whatever reserved space the user specifies. If there's less space
@@ -1306,9 +1332,9 @@ and the derived files           multicolrule.ins,
   {\l_@@_extend_bot_dim}
 }
 %    \end{macrocode}
-%\end{function}
+%\end{macro}
 %
-%\begin{function}{\@@_extend_reserve:}
+%\begin{macro}{\@@_extend_reserve:}
 % The reserved space is the amount of user-provided space we want, but we also
 % have to account for the space added with \cs{multicolsep}.
 %    \begin{macrocode}
@@ -1319,7 +1345,7 @@ and the derived files           multicolrule.ins,
   {\c_zero_dim}
 }
 %    \end{macrocode}
-%\end{function}
+%\end{macro}
 %
 %\begin{function}{\mcrule_divider:}
 % This is the routine that contains the instructions to draw one copy
@@ -1331,15 +1357,15 @@ and the derived files           multicolrule.ins,
 %    \end{macrocode}
 %\end{function}
 %
-%\begin{function}{\@@_pattern:nnn}
+%\begin{macro}{\@@_pattern:nnn}
 %  \begin{syntax}
-%    |\__mcrule_pattern:nnn| \Arg{pattern} \Arg{space above} \Arg{space below}
+%    \cs{@@_mcrule_pattern:nnn} \Arg{pattern} \Arg{space above} \Arg{space below}
 %  \end{syntax}
 % Typesets a single copy of a pattern, vertically centered, in a vertical
 % box that is the height of the current column. The pattern must be
 % something that can go in a horizontal box. The \meta{space above} and
 % \meta{space below} arguments must be dimension expressions.
-% \changes{1.2a}{2018/1/2}{Allow evaluated dimensions for kerns}
+% \changes{v1.2a}{2018/1/2}{Allow evaluated dimensions for kerns}
 %    \begin{macrocode}
 \cs_new_nopar:Npn \@@_pattern:nnn #1#2#3
 {
@@ -1356,17 +1382,17 @@ and the derived files           multicolrule.ins,
   }
 }
 %    \end{macrocode}
-%\end{function}
+%\end{macro}
 %
-%\begin{function}{\@@_tile_pattern:nnn}
+%\begin{macro}{\@@_tile_pattern:nnn}
 %  \begin{syntax}
-%    |\__mcrule_tile_pattern:nnn| \Arg{pattern} \Arg{space above} \Arg{space below}
+%    \cs{mcrule_tile_pattern:nnn} \Arg{pattern} \Arg{space above} \Arg{space below}
 %  \end{syntax}
 % Typesets multiple copies of pattern, tiled so as to occupy a vertical box
 % that is the height of the current column. The pattern must be something
 % that can go in a horizontal box. The \meta{space above} and
 % \meta{space below} arguments must be dimension expressions.
-% \changes{1.2a}{2018/1/2}{Allow evaluated dimensions for kerns}
+% \changes{v1.2a}{2018/1/2}{Allow evaluated dimensions for kerns}
 %    \begin{macrocode}
 \cs_new_nopar:Npn \@@_tile_pattern:nnn #1#2#3
 {
@@ -1385,17 +1411,18 @@ and the derived files           multicolrule.ins,
   }
 }
 %    \end{macrocode}
-%\end{function}
+%\end{macro}
 %
-%\begin{function}{\@@_line_pattern:nnnn}
+%\begin{macro}{\@@_line_pattern:nnnn}
 %  \begin{syntax}
-%    |\__mcrule_line_pattern:nnnn| \Arg{tikz-name} \Arg{height} \Arg{space above}
+%    \cs{@@_mcrule_line_pattern:nnnn} \Arg{tikz-name} \Arg{height} \Arg{space above}
 %      \Arg{space below}
 %  \end{syntax}
 % This function can draw a line pattern using either a \pkg{tikz} name or
 % directly (as a tiled pattern). The latter case is currently limited to line
 % patterns that can be described in terms of a solid line of length
 % \meta{height} separated by spaces above and/or below the line.
+%
 %    \begin{macrocode}
 \cs_new:Npn \@@_line_pattern:nnnn #1#2#3#4
 {
@@ -1408,9 +1435,9 @@ and the derived files           multicolrule.ins,
   }
 }
 %    \end{macrocode}
-%\end{function}
+%\end{macro}
 %
-%\begin{function}{\@@_solid_line:}
+%\begin{macro}{\@@_solid_line:}
 % Unlike the default solid line, which is created with a simple \tn{vrule},
 % this version allows us to extend the line beyond the natural space of the
 % column.
@@ -1420,18 +1447,18 @@ and the derived files           multicolrule.ins,
   \rule[-\@@_column_total_depth:]{\columnseprule}{\@@_column_total_height:}
 }
 %    \end{macrocode}
-%\end{function}
+%\end{macro}
 %
-%\begin{function}{\@@_strut:}
+%\begin{macro}{\@@_strut:}
 % Uses a zero-width rule, regardless of the actual value of \cs{columnseprule}.
-% \changes{1.3}{2019/10/1}{New function}
+% \changes{v1.3}{2019/10/1}{New function}
 %    \begin{macrocode}
 \cs_new:Npn \@@_strut:
 {
   \rule[-\@@_column_total_depth:]{0pt}{\@@_column_total_height:}
 }
 %    \end{macrocode}
-%\end{function}
+%\end{macro}
 %
 % \subsubsection{Tikz-only Routines}
 %
@@ -1447,7 +1474,7 @@ and the derived files           multicolrule.ins,
   \ExplSyntaxOn  
 %    \end{macrocode}
 % 
-%\begin{function}{\@@_tikz_picture:n}
+%\begin{macro}{\@@_tikz_picture:n}
 %  \begin{syntax}
 %    |\__mcrule_tikz_picture:n| \Arg{draw function}
 %  \end{syntax}
@@ -1466,11 +1493,11 @@ and the derived files           multicolrule.ins,
     \end{tikzpicture}
 }
 %    \end{macrocode}
-%\end{function}
+%\end{macro}
 %
-%\begin{function}{\@@_pattern_line:n}
+%\begin{macro}{\@@_pattern_line:n}
 %  \begin{syntax}
-%    |\__mcrule_pattern_line:n| \Arg{tikz pattern}
+%    \cs{@@_mcrule_pattern_line:n} \Arg{tikz pattern}
 %  \end{syntax}
 % For the \pkg{tikz} versions of the predefined lines, we just draw
 % a line the length of the column box. \meta{tikz pattern} should 
@@ -1484,9 +1511,9 @@ and the derived files           multicolrule.ins,
   \end{tikzpicture}
 }
 %    \end{macrocode}
-%\end{function}
+%\end{macro}
 %
-%\begin{function}{\@@_circle:}
+%\begin{macro}{\@@_circle:}
 % Draw a hollow circle with a diameter equal to |\columnseprule|. This will be
 % used as a tile pattern.
 %
@@ -1498,9 +1525,9 @@ and the derived files           multicolrule.ins,
     \end{tikzpicture}
   }
 %    \end{macrocode}
-%\end{function}
+%\end{macro}
 %
-%\begin{function}{\@@_solid_circle:}
+%\begin{macro}{\@@_solid_circle:}
 % Draw a filled circle with a diameter equal to |\columnseprule|. This will be
 % used as a tile pattern.
 %
@@ -1513,7 +1540,7 @@ and the derived files           multicolrule.ins,
   } 
 }
 %    \end{macrocode}
-%\end{function}
+%\end{macro}
 %
 % In case \pkg{tikz} functions are not active, we provide stubs
 % that issue error messages.
@@ -1532,7 +1559,7 @@ and the derived files           multicolrule.ins,
 %    \end{macrocode}
 %
 % \subsection{Color}
-%\begin{function}{\@@_set_rule_color:}
+%\begin{macro}{\@@_set_rule_color:}
 % Reset color definition in \cs{columnseprulecolor} by name or
 % by model and color specification.
 %
@@ -1553,11 +1580,11 @@ and the derived files           multicolrule.ins,
   }
 }
 %    \end{macrocode}
-%\end{function}
+%\end{macro}
 %
 % \subsection{Patterns}
 %
-%\begin{function}{\@@_set_pattern_list:n}
+%\begin{macro}{\@@_set_pattern_list:n}
 % Sets a comma-separated list of patterns as a sequence for later use. The
 % global counter that indicates where we are in the list is also reset here, so
 % setting a list of patterns always means that the next rule will use the first
@@ -1571,9 +1598,9 @@ and the derived files           multicolrule.ins,
   \int_gset:Nn \g_@@_pattern_for_int {-1}
 }
 %    \end{macrocode}
-%\end{function}
+%\end{macro}
 %
-%\begin{function}{\@@_set_pattern:n}
+%\begin{macro}{\@@_set_pattern:n}
 %  
 % Set the keys an individual pattern. To avoid potential recursion and loops,
 % we filter out the key `pattern' when it appears in a pattern definition.
@@ -1591,7 +1618,7 @@ and the derived files           multicolrule.ins,
 }
 \cs_generate_variant:Nn \@@_set_pattern:n {V}
 %    \end{macrocode}
-%\end{function}
+%\end{macro}
 %
 % \subsection{Key-Values}
 % Set up all the key definitions. For the line styles, this involves
@@ -1731,10 +1758,10 @@ and the derived files           multicolrule.ins,
 %\end{macro}
 %
 %\begin{macro}{\DeclareMCRulePattern}
-% Declare a new style pattern. 
 % \begin{syntax}
-% |\DeclareMCRule| \marg{name} \marg{key-value list}
+%   \cs{DeclareMCRule} \Arg{name} \meta{key-value list}
 % \end{syntax}
+% Declare a new style pattern. 
 % If a pattern of that name exists, it will be overwritten silently.
 %    \begin{macrocode}
 \NewDocumentCommand{\DeclareMCRulePattern}{m m}
