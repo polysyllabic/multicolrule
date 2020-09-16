@@ -1,0 +1,14 @@
+This is makeindex, version 2.15 [TeX Live 2020/W32TeX] (kpathsea + Thai support).
+Scanning style file c:/texlive/2020/texmf-dist/makeindex/latex/gglo.ist........
+** Input style error (file = c:/texlive/2020/texmf-dist/makeindex/latex/gglo.ist, line = 66):
+   -- Unknown specifier lethead_prefix.
+** Input style error (file = c:/texlive/2020/texmf-dist/makeindex/latex/gglo.ist, line = 67):
+   -- Unknown specifier lethead_suffix.
+** Input style error (file = c:/texlive/2020/texmf-dist/makeindex/latex/gglo.ist, line = 68):
+   -- Unknown specifier lethead_flag.
+......done (14 attributes redefined, 3 ignored).
+Scanning input file multicolrule.glo....done (6 entries accepted, 0 rejected).
+Sorting entries....done (18 comparisons).
+Generating output file multicolrule.gls....done (17 lines written, 0 warnings).
+Output written in multicolrule.gls.
+Transcript written in multicolrule.ilg.

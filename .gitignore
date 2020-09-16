@@ -1,0 +1,13 @@
+*.aux
+*.glo
+*.hd
+*.idx
+*.ins
+*.log
+*.out
+*.slnc
+*.gz
+*.toc
+*.zip
+*test.tex
+multicolrule.sty

@@ -8,7 +8,7 @@
 \usepackage{bbding}
 \usepackage{pgfornament}
 \usepackage{bidi}
-\usetikzlibrary{calc}
+\usetikzlibrary{math,calc}
 \setlength{\columnsep}{24pt}
 \setlength{\columnseprule}{.5pt}
 \begin{document}
@@ -164,7 +164,7 @@ for instructions on how to set them in your own documents.
   \lipsum[1-2]
 \end{multicols}
 
-\begin{multicols}{2}[Custom line with horizontal lines flush with vertical rule]
+\begin{multicols}{2}[Custom line with horizontal lines flush with vertical rule\footnote{Based on an answer to tex.stackexchange question 47828}]
   \SetMCRule{color=gray,width=0.4pt, expand=2pt, custom-line={
       \coordinate (TOPLEFT) at ($(TOP)-(\columnwidth+.5\columnsep,\columnseprule)$);
       \coordinate (TOPRIGHT) at ($(TOP)+(\columnwidth+.5\columnsep,-\columnseprule)$);
@@ -172,6 +172,29 @@ for instructions on how to set them in your own documents.
       \coordinate (BOTRIGHT) at ($(BOT)+(\columnwidth+.5\columnsep,\columnseprule)$);
       \draw[line width=\columnseprule] (TOPLEFT) -- (TOPRIGHT)
       (TOP) -- (BOT) (BOTLEFT) -- (BOTRIGHT);}}
+  \lipsum[1-2]
+\end{multicols}
+
+\setlength{\columnsep}{2in}
+
+\begin{multicols}{2}[Notepad image between two columns\footnote{Based on an answer to tex.stackexchange question 522305}]
+      \SetMCRule{color=blue!10,width=2pt, custom-line={
+      \tikzmath {coordinate \t, \b;
+        \t = (TOP)-(.45\columnsep,0);
+        integer \r, \s;
+        \r = \ty / 16;
+        \s = \ty - \r*16;
+        \t = (\t)-(0,.5*\s);
+        \b = (\t)+(.9\columnsep,-\r*16);
+      }
+      \draw [line width=\columnseprule]
+      (\t) -- ++(.9\columnsep,0) -- (\b) -- ++(-.9\columnsep,0) -- cycle;
+      \foreach \fila in {1,...,\r}
+      {
+        \draw [line width=\columnseprule]
+        ($(\t)-(0,\fila*16pt)$) -- ++(0.90\columnsep,0);
+      }
+  }}
   \lipsum[1-2]
 \end{multicols}
 

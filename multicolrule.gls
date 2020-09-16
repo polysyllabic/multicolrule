@@ -1,0 +1,17 @@
+
+ \begin{theglossary} 
+
+    \makeatletter\scan@allowedfalse
+
+  \item v1.0\efill 
+ \subitem General:\ Initial public release\pfill \hdpindex{}{1}
+  \item v1.1\efill 
+ \subitem General:\ Allow extended rules\pfill \hdpindex{}{1}
+      \subsubitem Support bidi\pfill \hdpindex{}{1}
+  \item v1.2\efill 
+ \subitem General:\ Allow per-column rule changes\pfill \hdpindex{}{1}
+      \subsubitem Define rule patterns\pfill \hdpindex{}{1}
+  \item v1.2a\efill 
+ \subitem General:\ Improve documentation\pfill \hdpindex{}{1}
+
+ \end{theglossary}

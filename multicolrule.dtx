@@ -54,7 +54,7 @@ See http://www.latex-project.org/lppl.txt
 
 \endpreamble
 \postamble
-Copyright (C) 2018-2019 by Karl Hagen <latex@polysyllabic.com>
+Copyright (C) 2018-2020 by Karl Hagen <latex@polysyllabic.com>
  
 This file may be distributed and/or modified under the
 conditions of the LaTeX Project Public License (LPPL), either
@@ -276,11 +276,10 @@ and the derived files           multicolrule.ins,
 % or the \LaTeX{} kernel, depending on the mode of operation. If \pkg{bidi} is
 % loaded, it will also patch that. It will have no effect if you use a class or
 % package that outputs column text via alternate mechanisms. This includes
-% \pkg{parcolumns}, and probably other classes and packages designed to typeset
-% parallel-column text as well, although I have not done a survey to determine
-% whether this is the case. If you would like support for one of these, please
-% send me an email or file a feature request on github and I'll see what I can
-% do.
+% \pkg{parcolumns}, \pkg{paracol}, and probably any other class that does its
+% own multi-column formatting. If you would like support for one of these,
+% please send me an email or file a feature request on github and I'll see what
+% I can do.
 %
 % The line styles that work by repeating elements in a tiled pattern may have
 % significant gaps at the end of columns, particularly for larger patterns.
@@ -302,7 +301,7 @@ and the derived files           multicolrule.ins,
 % \begin{multicols}{2}[\subsection{License}]
 % \SetMCRule{width=ultra-thick,line-style=dotted}
 % The\stydsc{\texttt{line-style=dotted, width=ultra-thick}} \mcrule{}
-% package is copyright 2018--2019 by Karl Hagen. It may be distributed and/or
+% package is copyright 2018--2020 by Karl Hagen. It may be distributed and/or
 % modified under the conditions of the \LaTeX{} Project Public License, either
 % version 1.3c of this license or (at your option) any later version. The
 % latest version of this license is in
@@ -333,12 +332,12 @@ and the derived files           multicolrule.ins,
 % others look better with it. The default behavior of \mcrule{} depends on the
 % status of the \pkg{tikz} package at the time \mcrule{} is loaded. If
 % \mcrule{} detects that \pkg{tikz} is already loaded, then tikz support will
-% be enabled by default. Otherwise, you need the \opt{tikz} to enable it. This
-% option also accepts explicit boolean values, so you can pass |tikz=false| if
-% you want to explicitly disable tikz support. If tikz support is not enabled
-% (or if it is explicitly disabled), the line styles marked \emph{tikz only}
-% in section \ref{sec:linestyles} will be unavailable and errors will result
-% if you try to use them.
+% be enabled by default. Otherwise, you need to provide the \opt{tikz} option
+% to enable it. This option also accepts explicit boolean values, so you can
+% pass |tikz=false| if you want to explicitly disable tikz support. If tikz
+% support is not enabled (or if it is explicitly disabled), the line styles
+% marked \emph{tikz only} in section \ref{sec:linestyles} will be unavailable
+% and errors will result if you try to use them.
 %
 % \subsection{Option `twocolumn'}
 % \DescribeOption{twocolumn}
@@ -380,7 +379,7 @@ and the derived files           multicolrule.ins,
 % a page unless you close out one \env{multicols} environment and begin another.
 %  
 % Table \ref{table:mcrulekeys} summarizes the keys available in \cs{SetMCRule}.
-% The functions of each is described in detail in the sections that follow.
+% The functions of each are described in detail in the sections that follow.
 % \end{multicols}
 %
 % \begin{longtable}{lp{3.5in}}
@@ -569,7 +568,7 @@ and the derived files           multicolrule.ins,
 %
 % The rule in this section uses the \cs{SparkleBold} symbol from
 % \pkg{bbding}. Notice that when you use the \kvdesc{custom-tile} parameter,
-% of any of the other custom key commands, you do \emph{not} specify a separate
+% or any of the other custom key commands, you do \emph{not} specify a separate
 % \kvdesc{line-style}. If you try to provide both, the last style given in the
 % list will be the one that is kept.
 % \end{multicols}
@@ -891,7 +890,7 @@ and the derived files           multicolrule.ins,
 %\subsection{Preliminaries}
 %
 %    \begin{macrocode}
-\ProvidesExplPackage {multicolrule} {2019/10/01} {1.3}
+\ProvidesExplPackage {multicolrule} {2020/09/14} {1.3a}
   {Decorative vertical rules between columns}
 %    \end{macrocode}
 %
@@ -922,6 +921,7 @@ and the derived files           multicolrule.ins,
 %    \begin{macrocode}
 \bool_new:N \g_@@_twocolumn_bool
 \bool_new:N \g_@@_use_tikz_bool
+\bool_new:N \g_@@_paracol_bool
 %    \end{macrocode}
 %\end{variable}
 %
@@ -987,8 +987,11 @@ and the derived files           multicolrule.ins,
 \keys_define:nn {mcrule-opts}
 {
   twocolumn .bool_gset:N = \g_@@_twocolumn_bool,
+  twocolumn .default:n   = true,
   tikz      .bool_gset:N = \g_@@_use_tikz_bool,
   tikz      .default:n   = true,
+  paracol   .bool_gset:N = \g_@@_paracol_bool,
+  paracol   .default:n   = true,
 }
 \ProcessKeysOptions{mcrule-opts}
 %    \end{macrocode}
@@ -1102,9 +1105,10 @@ and the derived files           multicolrule.ins,
 % after \pkg{xcolor}, \pkg{tikz}, \emph{and} \pkg{multicol}, so it must always
 % be loaded after us. We use \cs{AfterPackage} from \pkg{scrlfile} to insert
 % the patch if \pkg{bidi} is loaded later on.
+% \changes{v1.3a}{2020/9/14}{Update scrlfile command because of API change in that package.}
 %
 %    \begin{macrocode}
-  \AfterPackage!{bidi}
+  \AfterAtEndOfPackage*{bidi}
   {
     \@@_patch_twocol_output:N \RTL@outputdblcol
     \@@_patch_twocol_output:N \LTR@outputdblcol
@@ -1770,6 +1774,10 @@ and the derived files           multicolrule.ins,
 }
 %    \end{macrocode}
 %\end{macro}
+%
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
 %
 %\end{implementation}
 %
