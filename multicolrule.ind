@@ -1,9 +1,0 @@
-
- \begin{theindex} 
- \makeatletter\scan@allowedfalse
-{\bfseries\hfil T\hfil}\nopagebreak
-
-  \item {\verbatim@font \verb*&\twocolumn&}\pfill 
-		\hdclindex{0}{usage}{1}
-
- \end{theindex}
